@@ -69,31 +69,33 @@ $contractList = @();
 if ($useFormations -eq $true) {
     foreach ($data in $employeeData) {
         
-        $formationData = $formations[$data.FN_GUID] | Sort-Object -Descending FV_Volgnummer
-        foreach ($formation in $formationData) {
-            $Contract = [PSCustomObject]@{
-                ExternalId = $formation.FV_GUID
-                Medewerker = $data.Medewerker
-            }
+        if($data.FN_GUID){
+            $formationData = $formations[$data.FN_GUID] | Sort-Object -Descending FV_Volgnummer
+            foreach ($formation in $formationData) {
+                $Contract = [PSCustomObject]@{
+                    ExternalId = $formation.FV_GUID
+                    Medewerker = $data.Medewerker
+                }
 
-            $Contract | Add-Member -MemberType NoteProperty -Name "Data" -Value $null -Force
-            $Contract.Data = $data;
+                $Contract | Add-Member -MemberType NoteProperty -Name "Data" -Value $null -Force
+                $Contract.Data = $data;
 
-            $Contract | Add-Member -MemberType NoteProperty -Name "Formatie" -Value $null -Force
-            $Contract.Formatie = $formation;
+                $Contract | Add-Member -MemberType NoteProperty -Name "Formatie" -Value $null -Force
+                $Contract.Formatie = $formation;
 
-            $Contract | Add-Member -MemberType NoteProperty -Name "DepartmentDesc" -Value $null -Force
-            $organizationalUnit = $organizationalUnits[$formation.FV_OE] | Select-Object -First 1
-            if ($organizationalUnit -ne $null) {
-                $Contract.DepartmentDesc = $organizationalUnit.UnitDesc
-            }
-            $Contract | Add-Member -MemberType NoteProperty -Name "CostcenterDesc" -Value $null -Force
-            $costcenter = $costcenters[$data.DV_Werkgever, $formation.FV_Kostenplaats] | Select-Object -First 1
-            if ($costcenter -ne $null) {
-                $Contract.CostcenterDesc = $costcenter.Omschrijving
-            }
-            $contractList += $Contract
-        }       
+                $Contract | Add-Member -MemberType NoteProperty -Name "DepartmentDesc" -Value $null -Force
+                $organizationalUnit = $organizationalUnits[$formation.FV_OE] | Select-Object -First 1
+                if ($organizationalUnit -ne $null) {
+                    $Contract.DepartmentDesc = $organizationalUnit.UnitDesc
+                }
+                $Contract | Add-Member -MemberType NoteProperty -Name "CostcenterDesc" -Value $null -Force
+                $costcenter = $costcenters[$data.DV_Werkgever, $formation.FV_Kostenplaats] | Select-Object -First 1
+                if ($costcenter -ne $null) {
+                    $Contract.CostcenterDesc = $costcenter.Omschrijving
+                }
+                $contractList += $Contract
+            }     
+        }  
     }
 } 
 else {
