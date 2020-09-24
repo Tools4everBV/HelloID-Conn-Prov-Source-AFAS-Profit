@@ -46,17 +46,6 @@ function Get-AFASConnectorData
 $organizationalUnits = New-Object System.Collections.ArrayList
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits" ([ref]$organizationalUnits)
 
-# Extend the organizationalUnits with required and additional fields
-$organizationalUnits | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
-$organizationalUnits | Add-Member -MemberType NoteProperty -Name "DisplayName" -Value $null -Force
-$organizationalUnits | Add-Member -MemberType NoteProperty -Name "ManagerExternalId" -Value $null -Force
-$organizationalUnits | Add-Member -MemberType NoteProperty -Name "ParentExternalId" -Value $null -Force
-$organizationalUnits | ForEach-Object {
-    $_.ExternalId = $_.UnitD
-    $_.DisplayName = $_.UnitDesc
-    $_.ManagerExternalId = $_.Leidinggevende
-    $_.ParentExternalId = $_.UpperUnit;
-}
 # Export the json
 $json = $organizationalUnits | ConvertTo-Json -Depth 3
 Write-Output $json
