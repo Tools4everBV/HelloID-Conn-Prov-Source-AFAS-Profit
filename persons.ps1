@@ -50,26 +50,17 @@ $employments = New-Object System.Collections.ArrayList
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments" ([ref]$employments)
 
 # Group the employments
-$employments = $employments | Group-Object Nummer -AsHashTable
+$employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
 # Extend the persons with positions and required fields
 $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
 $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
 $persons | ForEach-Object {
-    $_.ExternalId = $_.Nummer
-    $contracts = $employments[$_.Nummer]
+    $_.ExternalId = $_.Persoonsnummer
+    $contracts = $employments[$_.Persoonsnummer]
     if ($null -ne $contracts) {
         $_.Contracts = $contracts
-    }
-    if ([string]::IsNullOrEmpty($_.Roepnaam) -eq $true) {
-        $_.Roepnaam = "nvt"
-    }
-    if ([string]::IsNullOrEmpty($_.Geboortenaam) -eq $true) {
-        $_.Geboortenaam = "nvt"
-    }
-    if ([string]::IsNullOrEmpty($_.Voornaam) -eq $true) {
-        $_.Voornaam = "nvt"
     }
     if ($_.Naamgebruik_code -eq "0") {
         $_.Naamgebruik_code = "B"

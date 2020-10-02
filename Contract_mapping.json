@@ -9,6 +9,14 @@
             }
         },
         {
+            "name": "Contact.Business.Phone.Fixed",
+            "mode": "field",
+            "value": "Telefoonnr_werk",
+            "validation": {
+                "required": false
+            }
+        },
+        {
             "name": "Contact.Business.Phone.Mobile",
             "mode": "field",
             "value": "Mobielnr_werk",
@@ -21,7 +29,7 @@
             "mode": "field",
             "value": "ExternalId",
             "validation": {
-                "required": false
+                "required": true
             }
         },
         {
@@ -175,13 +183,13 @@
             "mode": "field",
             "value": "ExternalID",
             "validation": {
-                "required": false
+                "required": true
             }
         },
         {
             "name": "Manager.ExternalId",
             "mode": "field",
-            "value": "ManagerExternalId",
+            "value": "Persoonsnummer_leidinggevende",
             "validation": {
                 "required": false
             }
