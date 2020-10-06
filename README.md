@@ -78,4 +78,9 @@ The data collection retrieved by the set of GetConnector's used in this reposito
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+Update the scripts with your own values:
+
+    token: Replace '<provide XML token here>' with your own APP connector token.
+    baseUri: Replace '<Provide Environment Id here>' by the environment code of your Profit environment.
+
 _For more information about our HelloID PowerShell connectors, please refer to our general [Documentation](https://docs.helloid.com/hc/en-us/articles/360012558020-How-to-configure-a-custom-PowerShell-target-connector) page_
