@@ -21,7 +21,15 @@ For this connector we have created a default set, which can be imported directly
 <!-- GETTING STARTED -->
 ## Getting Started
 
-By using this connector you will have the ability to retrieve employee and contract data from the AFAS Profit HR system. 
+By using this connector you will have the ability to retrieve employee and contract data from the AFAS Profit HR system.
+
+Connecting to Profit is done using the app connector system. 
+Please see the following pages from the AFAS Knowledge Base for more information.
+
+[Create the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Add.htm)
+[Manage the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Maint.htm)
+[Manual add a token to the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Tokens_Manual.htm)
+
 
 ### Source
 
