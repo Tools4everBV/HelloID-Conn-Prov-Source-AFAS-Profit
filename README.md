@@ -50,16 +50,16 @@ The data collection retrieved by the set of GetConnector's used in this reposito
 
 <table>
 <tr><td><b>Connector</b></td><td><b>Field</b></td><td><b>Default filter</b></td></tr>
-<tr><td><i>T4E_HelloID_Employments</i></td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td></tr>
+<tr><td><i><b>Tools4ever - HelloID - T4E_HelloID_Employments</b></i></td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td></tr>
 <tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td></tr>
 <tr><td>&nbsp;</td><td>function start date</td><td>&lt;[Vandaag + 1 maand]</td></tr>
 <tr><td>&nbsp;</td><td>function end date</td><td>&gt;[Vandaag - 3 maanden];[]</td></tr>
-<tr><td><i>Tools4ever - HelloID - T4E_HelloID_Groups</i></td><td>usergroup blocked</td><td>=N</td></tr>
-<tr><td><i>Tools4ever - HelloID - T4E_HelloID_UserGroups</i></td><td>Group</td><td>!=Iedereen</td></tr>
+<tr><td><i><b>Tools4ever - HelloID - T4E_HelloID_Groups</b></i></td><td>usergroup blocked</td><td>=N</td></tr>
+<tr><td><i><b>Tools4ever - HelloID - T4E_HelloID_UserGroups</b></i></td><td>Group</td><td>!=Iedereen</td></tr>
 <tr><td>&nbsp;</td><td>User</td><td>![]</td></tr>
 <tr><td>&nbsp;</td><td>user blocked</td><td>=N</td></tr>
 <tr><td>&nbsp;</td><td>usergroup blocked</td><td>=N</td></tr>
-<tr><td><i>Tools4ever - HelloID - T4E_HelloID_Users</i></td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td></tr>
+<tr><td><i><b>Tools4ever - HelloID - T4E_HelloID_Users</b></i></td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td></tr>
 <tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td></tr>
 <tr><td>&nbsp;</td><td>user blocked</td><td>=N</td></tr>
 </table>
