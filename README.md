@@ -50,27 +50,27 @@ The data collection retrieved by the set of GetConnector's used in this reposito
 
 <table>
 <tr><td>Connector</td><td>Field</td><td>Filter</td><td>Description</td></tr>
-<tr><td>T4E_HelloID_Employments</td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>function start date</td><td>&lt;[Vandaag + 1 maand]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>function end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>$nbsp;</td></tr>
+<tr><td>T4E_HelloID_Employments</td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>function start date</td><td>&lt;[Vandaag + 1 maand]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>function end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>&nbsp;</td></tr>
 
-<tr><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 
-<tr><td>Tools4ever - HelloID - T4E_HelloID_Groups</td><td>usergroup blocked</td><td>=N</td><td>$nbsp;</td></tr>
+<tr><td>Tools4ever - HelloID - T4E_HelloID_Groups</td><td>usergroup blocked</td><td>=N</td><td>&nbsp;</td></tr>
 
-<tr><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 
-<tr><td>Tools4ever - HelloID - T4E_HelloID_UserGroups</td><td>Group</td><td>!=Iedereen</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>User</td><td>![]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>user blocked</td><td>=N</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>usergroup blocked</td><td>=N</td><td>$nbsp;</td></tr>
+<tr><td>Tools4ever - HelloID - T4E_HelloID_UserGroups</td><td>Group</td><td>!=Iedereen</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>User</td><td>![]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>user blocked</td><td>=N</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>usergroup blocked</td><td>=N</td><td>&nbsp;</td></tr>
 
-<tr><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td><td>$nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 
-<tr><td>Tools4ever - HelloID - T4E_HelloID_Users</td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>$nbsp;</td></tr>
-<tr><td>&nbsp;</td><td>user blocked</td><td>=N</td><td>$nbsp;</td></tr>
+<tr><td>Tools4ever - HelloID - T4E_HelloID_Users</td><td>contract start date</td><td>&lt;[Vandaag + 1 maand]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>contract end date</td><td>&gt;[Vandaag - 3 maanden];[]</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>user blocked</td><td>=N</td><td>&nbsp;</td></tr>
 
 </table>
 
