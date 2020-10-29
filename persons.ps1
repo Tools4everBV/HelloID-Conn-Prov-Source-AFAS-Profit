@@ -1,5 +1,9 @@
-$token = "<provide XML token here>"
-$baseUri = "https://<Provide Environment Id here>.rest.afas.online/profitrestservices";
+#Region Script
+$connectionSettings = ConvertFrom-Json $configuration
+
+$baseUri = $($connectionSettings.BaseUrl)
+$token = $($connectionSettings.Token)
+$includePositions = $($connectionSettings.switchIncludePositions)
 
 # Enable TLS 1.2
 if ([Net.ServicePointManager]::SecurityProtocol -notmatch "Tls12") {
@@ -52,6 +56,14 @@ Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Em
 # Group the employments
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
+if($true -eq $includePositions)
+{
+    $positions = New-Object System.Collections.ArrayList
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions" ([ref]$positions)
+
+    $positions = $positions | Group-Object Persoonsnummer -AsHashTable
+}
+
 # Extend the persons with positions and required fields
 $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
 $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
@@ -61,6 +73,13 @@ $persons | ForEach-Object {
     $contracts = $employments[$_.Persoonsnummer]
     if ($null -ne $contracts) {
         $_.Contracts = $contracts
+    }
+    if($true -eq $includePositions)
+    {
+        $positionExtension = $positions[$_.Persoonsnummer]
+        if ($null -ne $positionExtension) {
+            $_.Contracts += $positionExtension
+        }
     }
     if ($_.Naamgebruik_code -eq "0") {
         $_.Naamgebruik_code = "B"

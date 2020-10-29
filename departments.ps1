@@ -1,5 +1,8 @@
-$token = "<provide XML token here>"
-$baseUri = "https://<Provide Environment Id here>.rest.afas.online/profitrestservices";
+#Region Script
+$connectionSettings = ConvertFrom-Json $configuration
+
+$baseUri = $($connectionSettings.BaseUrl)
+$token = $($connectionSettings.Token)
 
 # Enable TLS 1.2
 if ([Net.ServicePointManager]::SecurityProtocol -notmatch "Tls12") {
