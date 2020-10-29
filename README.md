@@ -9,8 +9,9 @@
 * [Getting Started](#getting-started)
   * [Source](#source)
   * [Target](#target)
+  * [Mappings](#mappings)
   * [Scope](#scope)
-* [Usage](#usage)
+* [Setup the PowerShell connector](#setup-the-powershell-connector)
 
 
 ## Introduction
@@ -38,6 +39,7 @@ Please see the following pages from the AFAS Knowledge Base for more information
 The following GetConnectors are required by HelloID when the system is defined as source system: 
 
 *	Tools4ever - HelloID - T4E_HelloID_Employments
+*	Tools4ever - HelloID - T4E_HelloID_Positions
 *	Tools4ever - HelloID - T4E_HelloID_Groups
 *	Tools4ever - HelloID - T4E_HelloID_OrganizationalUnits
 *	Tools4ever - HelloID - T4E_HelloID_Users
@@ -53,6 +55,9 @@ In addition to use to the above get-connector, the connector also uses the follo
 
 *	knEmployee
 *	knUser
+
+### Mappings
+A basic person and contract mapping is provided. Make sure to further customize these accordingly.
 
 ### Scope
 
@@ -77,11 +82,18 @@ The data collection retrieved by the set of GetConnector's used in this reposito
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+## Setup the PowerShell connector
 
-Update the scripts with your own values:
+1. Add a new 'Source System' to HelloID and make sure to import all the necessary files.
 
-    token: Replace '<provide XML token here>' with your own APP connector token.
-    baseUri: Replace '<Provide Environment Id here>' by the environment code of your Profit environment.
+    - [ ] configuration.json
+    - [ ] personMapping.json
+    - [ ] contractMapping.json
+    - [ ] persons.ps1
+    - [ ] departments.ps1
+
+2. Fill in the required fields on the 'Configuration' tab.
+
+![image](./assets/config.png)
 
 _For more information about our HelloID PowerShell connectors, please refer to our general [Documentation](https://docs.helloid.com/hc/en-us/articles/360012558020-How-to-configure-a-custom-PowerShell-target-connector) page_
