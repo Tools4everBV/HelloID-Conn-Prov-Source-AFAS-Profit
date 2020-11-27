@@ -235,6 +235,14 @@
             }
         },
         {
+            "name": "Title.ExternalId",
+            "mode": "field",
+            "value": "Functie_code",
+            "validation": {
+                "required": true
+            }
+        },
+        {
             "name": "Type.Description",
             "mode": "field",
             "value": "Type_contract",
