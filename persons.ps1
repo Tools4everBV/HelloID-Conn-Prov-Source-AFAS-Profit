@@ -38,7 +38,7 @@ function Get-AFASConnectorData
             [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
             $dataset = Invoke-RestMethod -Method GET -Uri $uri -ContentType "application/json" -Headers $Headers -UseBasicParsing
 
-            foreach ($record in $dataset.rows) { $data.Value.add($record) }
+            foreach ($record in $dataset.rows) { $null = $data.Value.add($record) }
 
         }until([string]::IsNullOrEmpty($dataset.rows))
     } catch {
