@@ -4,18 +4,15 @@ $connectionSettings = ConvertFrom-Json $configuration
 $baseUri = $($connectionSettings.BaseUrl)
 $token = $($connectionSettings.Token)
 
-# Enable TLS 1.2
-if ([Net.ServicePointManager]::SecurityProtocol -notmatch "Tls12") {
-    [Net.ServicePointManager]::SecurityProtocol += [Net.SecurityProtocolType]::Tls12
-}
+# Set TLS to accept TLS, TLS 1.1 and TLS 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
-function Get-AFASConnectorData
-{
+function Get-AFASConnectorData {
     param(
-        [parameter(Mandatory=$true)]$Token,
-        [parameter(Mandatory=$true)]$BaseUri,
-        [parameter(Mandatory=$true)]$Connector,
-        [parameter(Mandatory=$true)][ref]$data
+        [parameter(Mandatory = $true)]$Token,
+        [parameter(Mandatory = $true)]$BaseUri,
+        [parameter(Mandatory = $true)]$Connector,
+        [parameter(Mandatory = $true)][ref]$data
     )
 
     try {
@@ -27,22 +24,24 @@ function Get-AFASConnectorData
         $skip = 0
 
         $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-        $counter = 0 
-        do {
-            if ($counter -gt 0) {
-                $skip += 100
-                $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-            }    
-            $counter++
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
-            $dataset = Invoke-RestMethod -Method GET -Uri $uri -ContentType "application/json" -Headers $Headers -UseBasicParsing
+        $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
 
-            foreach ($record in $dataset.rows) { $null = $data.Value.add($record) }
+        foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
 
-        }until([string]::IsNullOrEmpty($dataset.rows))
-    } catch {
+        $skip += $take
+        while (@($dataset.rows).count -eq $take) {
+            $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
+
+            $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
+
+            $skip += $take
+
+            foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
+        }
+    }
+    catch {
         $data.Value = $null
-        Write-Verbose $_.Exception
+        Write-Verbose $_.Exception -Verbose
     }
 }
 
