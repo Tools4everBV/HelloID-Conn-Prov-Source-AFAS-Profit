@@ -44,8 +44,8 @@ function Get-AFASConnectorData {
         Write-Verbose -Verbose -Message "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
     } catch {
         $data.Value = $null
-        Write-Verbose -Verbose -Message "Error occured while downloading data through get-connector '$connector': $_.Exception.errorMessage - $_.ScriptStackTrace"
-        Throw "Critical error occured. Please see the snapshot log for details..."
+        Write-Verbose -Verbose -Message "Error occured while downloading data through get-connector '$connector': $($_.Exception.Message) - $($_.ScriptStackTrace)"
+        Throw "A critical error occured. Please see the snapshot log for details..."
     }
 }
 
