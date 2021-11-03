@@ -5,6 +5,7 @@ $baseUri = $($connectionSettings.BaseUrl)
 $token = $($connectionSettings.Token)
 $includePositions = $($connectionSettings.switchIncludePositions)
 
+Write-Verbose -Verbose -Message "Start person Import: Base URL: $baseUri, Using positions: $includePositions, token length: $($token.length)"
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
@@ -17,6 +18,7 @@ function Get-AFASConnectorData {
     )
 
     try {
+        Write-Verbose -Verbose -Message "Starting downloading objects through get-connector '$connector'"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -39,27 +41,40 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-    }
-    catch {
+        Write-Verbose -Verbose -Message "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+    } catch {
         $data.Value = $null
-        Write-Verbose $_.Exception -Verbose
+        Write-Verbose -Verbose -Message "Error occured while downloading data through get-connector '$connector': $_.Exception.errorMessage - $_.ScriptStackTrace"
+        Throw "Critical error occured. Please see the snapshot log for details..."
     }
 }
 
 $persons = New-Object System.Collections.ArrayList
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users" ([ref]$persons)
 
+
 $employments = New-Object System.Collections.ArrayList
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments" ([ref]$employments)
-
+$employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
 # Group the employments
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
-if($true -eq $includePositions)
-{
+### Example to add boolean values for each group membership
+#$groups = New-Object System.Collections.ArrayList
+#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups" ([ref]$groups)
+#$userGroups = New-Object System.Collections.ArrayList
+#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups" ([ref]$userGroups)
+# Group the group memberships
+#foreach ($group in $groups) {
+#    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($group.groupId)" -Value $false -Force
+#}
+#$userGroups = $userGroups | Group-Object UserId -AsHashTable
+## End Example (more configuration required in person loop, see below)
+
+if ($true -eq $includePositions) {
     $positions = New-Object System.Collections.ArrayList
     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions" ([ref]$positions)
-
+    $positions | Add-Member -MemberType NoteProperty -Name "Type" -Value "position" -Force
     $positions = $positions | Group-Object Persoonsnummer -AsHashTable
 }
 
@@ -73,8 +88,7 @@ $persons | ForEach-Object {
     if ($null -ne $contracts) {
         $_.Contracts = $contracts
     }
-    if($true -eq $includePositions)
-    {
+    if($true -eq $includePositions) {
         $positionExtension = $positions[$_.Persoonsnummer]
         if ($null -ne $positionExtension) {
             $_.Contracts += $positionExtension
@@ -92,13 +106,26 @@ $persons | ForEach-Object {
     if ($_.Naamgebruik_code -eq "3") {
         $_.Naamgebruik_code = "BP"
     }
+### Group membership example (person part)
+#    $groupMemberships = $userGroups[$_.Gebruiker]
+
+#    foreach ($groupMembership in $groupMemberships) {
+#       $_."Role_$($groupMembership.GroupId)" = $True
+#    }
+### End Group membership example (person part)
 }
 
 # Make sure persons are unique
 $persons = $persons | Sort-Object ExternalId -Unique
+
+### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
+#Write-Verbose -Verbose -Message "Filtering out persons without contract data. Before: $($persons.count)"
+#$persons = $persons | Where-Object contracts -ne $null
+#Write-Verbose -Verbose -Message  "Filtered out persons without contract data. After: $($persons.count)"
 
 # Export and sanitize the json
 $json = $persons | ConvertTo-Json -Depth 10
 $json = $json.Replace("._", "__")
 
 Write-Output $json
+Write-Verbose -Verbose -Message "End person import"
