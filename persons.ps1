@@ -18,7 +18,6 @@ function Get-AFASConnectorData {
     )
 
     try {
-        Write-Verbose -Verbose -Message "Starting downloading objects through get-connector '$connector'"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -26,21 +25,13 @@ function Get-AFASConnectorData {
         $take = 100
         $skip = 0
 
-        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-        $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
-
-        foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
-
-        $skip += $take
-        while (@($dataset.rows).count -eq $take) {
+        do  {
             $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-
             $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
-
             $skip += $take
-
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
-        }
+        }while (@($dataset.rows).count -eq $take)
+
         Write-Verbose -Verbose -Message "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
     } catch {
         $data.Value = $null
