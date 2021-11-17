@@ -23,21 +23,12 @@ function Get-AFASConnectorData {
         $take = 100
         $skip = 0
 
-        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-        $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
-
-        foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
-
-        $skip += $take
-        while (@($dataset.rows).count -eq $take) {
+        do  {
             $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
-
             $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
-
             $skip += $take
-
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
-        }
+        }while (@($dataset.rows).count -eq $take)
     }
     catch {
         $data.Value = $null
