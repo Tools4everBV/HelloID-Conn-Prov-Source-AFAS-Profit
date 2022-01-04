@@ -49,20 +49,20 @@ function Get-AFASConnectorData {
     }
 }
 
-$persons = New-Object System.Collections.ArrayList
+$persons = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users" ([ref]$persons)
 
 
-$employments = New-Object System.Collections.ArrayList
+$employments = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments" ([ref]$employments)
 $employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
 # Group the employments
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
 ### Example to add boolean values for each group membership
-#$groups = New-Object System.Collections.ArrayList
+#$groups = [System.Collections.ArrayList]::new()
 #Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups" ([ref]$groups)
-#$userGroups = New-Object System.Collections.ArrayList
+#$userGroups = [System.Collections.ArrayList]::new()
 #Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups" ([ref]$userGroups)
 # Group the group memberships
 #foreach ($group in $groups) {
@@ -72,7 +72,7 @@ $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 ## End Example (more configuration required in person loop, see below)
 
 if ($true -eq $includePositions) {
-    $positions = New-Object System.Collections.ArrayList
+    $positions = [System.Collections.ArrayList]::new()
     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions" ([ref]$positions)
     $positions | Add-Member -MemberType NoteProperty -Name "Type" -Value "position" -Force
     $positions = $positions | Group-Object Persoonsnummer -AsHashTable
