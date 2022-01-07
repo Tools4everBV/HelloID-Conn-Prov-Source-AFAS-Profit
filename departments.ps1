@@ -47,6 +47,7 @@ function Get-AFASConnectorData {
     }
 }
 
+# V2 Todo: Add warning when there are multiple managers assigned to one department
 $organizationalUnits = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
 

@@ -53,13 +53,52 @@ function Get-AFASConnectorData {
 
 $persons = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
+$persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
+$persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
 $employments = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
-$employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
+if ($positionsAction -ne "onlyEmployments") {
+    $positions = [System.Collections.ArrayList]::new()
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
+    $positions = $positions | Group-Object EmploymentExternalID -AsHashTable
+}
 
+
+
+$persons | ForEach-Object {
+    $_.ExternalId = $_.Persoonsnummer
+    $employmentList = $employments[$_.Persoonsnummer]
+    write-verbose -verbose $employmentList.Count
+    if ($null -ne $employmentList) {
+        if($positionsAction -eq "onlyEmployments") {
+            $_.Contracts = $employmentList
+        } else {
+            foreach ($employment in $employmentList) {
+                $positionList = $positions[$employment.externalId]
+                write-verbose -verbose $positionList.Count
+                if ($null -ne $positionExtension) {
+                        # Do error action here (empty externalID so helloid generates a blocked person)
+                        # Do not add contract, this should be enough in most implementations @Ramon, heb jij hier een slim idee?
+                } else {
+                    foreach ($position in $positionList) {
+                        foreach ($propery in $employment.psobject.properties) {
+                            Write-Verbose -Verbose "$(propery.MemberType), empl_$($propery.Name) $($propery.Value)"
+                            $position | Add-Member -MemberType $propery.MemberType -Name "empl_$($propery.Name)" -Value $propery.Value
+                        }
+                    }
+                    [void]$_.Contracts.value.Add($position)
+
+                    # -and $positionsAction -eq "usePositionsErrorWhenMissing") {
+                    # add position
+                }
+            }
+        }
+    } # TODO V2: else $contracts = []?
+
+#### TODO V2: Must be moved to correct place
 ### Example to add boolean values for each group membership 1/2
 ### V2 TODO: Toevoegen van filter (array) van gebruikte groepen, zodat de RAW data niet ontploft
     #$groups = [System.Collections.ArrayList]::new()
@@ -73,29 +112,6 @@ $employments = $employments | Group-Object Persoonsnummer -AsHashTable
     #$userGroups = $userGroups | Group-Object UserId -AsHashTable
 ## End Example (more configuration required in person loop, see below) 1/2
 
-if ($true -eq $includePositions) {
-    $positions = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
-    $positions | Add-Member -MemberType NoteProperty -Name "Type" -Value "position" -Force
-    $positions = $positions | Group-Object Persoonsnummer -AsHashTable
-}
-
-# Extend the persons with positions and required fields
-$persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
-$persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
-
-$persons | ForEach-Object {
-    $_.ExternalId = $_.Persoonsnummer
-    $contracts = $employments[$_.Persoonsnummer]
-    if ($null -ne $contracts) {
-        $_.Contracts = $contracts
-    }
-    if($true -eq $includePositions) {
-        $positionExtension = $positions[$_.Persoonsnummer]
-        if ($null -ne $positionExtension) {
-            $_.Contracts += $positionExtension
-        }
-    }
 
 ### Group membership example (person part) 2/2
     #    $groupMemberships = $userGroups[$_.Gebruiker]
