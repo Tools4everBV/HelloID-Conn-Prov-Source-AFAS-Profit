@@ -59,17 +59,19 @@ Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Em
 $employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
-### Example to add boolean values for each group membership
-#$groups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
-#$userGroups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
-# Group the group memberships
-#foreach ($group in $groups) {
-#    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($group.groupId)" -Value $false -Force
-#}
-#$userGroups = $userGroups | Group-Object UserId -AsHashTable
-## End Example (more configuration required in person loop, see below)
+
+### Example to add boolean values for each group membership 1/2
+### V2 TODO: Toevoegen van filter (array) van gebruikte groepen, zodat de RAW data niet ontploft
+    #$groups = [System.Collections.ArrayList]::new()
+    #Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
+    #$userGroups = [System.Collections.ArrayList]::new()
+    #Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
+    # Group the group memberships
+    #foreach ($group in $groups) {
+    #    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($group.groupId)" -Value $false -Force
+    #}
+    #$userGroups = $userGroups | Group-Object UserId -AsHashTable
+## End Example (more configuration required in person loop, see below) 1/2
 
 if ($true -eq $includePositions) {
     $positions = [System.Collections.ArrayList]::new()
@@ -95,19 +97,19 @@ $persons | ForEach-Object {
         }
     }
 
-### Group membership example (person part)
-#    $groupMemberships = $userGroups[$_.Gebruiker]
-
-#    foreach ($groupMembership in $groupMemberships) {
-#       $_."Role_$($groupMembership.GroupId)" = $True
-#    }
-### End Group membership example (person part)
+### Group membership example (person part) 2/2
+    #    $groupMemberships = $userGroups[$_.Gebruiker]
+    #    foreach ($groupMembership in $groupMemberships) {
+    #       $_."Role_$($groupMembership.GroupId)" = $true
+    #    }
+### End Group membership example (person part) 2/2
 }
 
 # Make sure persons are unique
 $persons = $persons | Sort-Object ExternalId -Unique
 
 ### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
+### *** Please consult with the Tools4ever consultant before enabling this code. ***
 #Write-Verbose -Verbose -Message "Filtering out persons without contract data. Before: $($persons.count)"
 #$persons = $persons | Where-Object contracts -ne $null
 #Write-Verbose -Verbose -Message  "Filtered out persons without contract data. After: $($persons.count)"
