@@ -3,9 +3,11 @@ $connectionSettings = ConvertFrom-Json $configuration
 
 $baseUri = $($connectionSettings.BaseUrl)
 $token = $($connectionSettings.Token)
-$includePositions = $($connectionSettings.switchIncludePositions)
+$positionsAction = $($connectionSettings.positionsAction)
 
-Write-Verbose -Verbose -Message "Start person Import: Base URL: $baseUri, Using positions: $includePositions, token length: $($token.length)"
+Write-Verbose -Verbose -Message "Start person import: Base URL: $baseUri, Using positions: $includePositions, token length: $($token.length)"
+Write-Verbose -Verbose -Message "Using positionsAction: '$positionsAction'"
+
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
@@ -52,11 +54,9 @@ function Get-AFASConnectorData {
 $persons = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
 
-
 $employments = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
 $employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
-# Group the employments
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
 ### Example to add boolean values for each group membership
@@ -94,18 +94,7 @@ $persons | ForEach-Object {
             $_.Contracts += $positionExtension
         }
     }
-    if ($_.Naamgebruik_code -eq "0") {
-        $_.Naamgebruik_code = "B"
-    }
-    if ($_.Naamgebruik_code -eq "1") {
-        $_.Naamgebruik_code = "PB"
-    }
-    if ($_.Naamgebruik_code -eq "2") {
-        $_.Naamgebruik_code = "P"
-    }
-    if ($_.Naamgebruik_code -eq "3") {
-        $_.Naamgebruik_code = "BP"
-    }
+
 ### Group membership example (person part)
 #    $groupMemberships = $userGroups[$_.Gebruiker]
 

@@ -21,7 +21,7 @@
     }
   },
   {
-    "key": "positions",
+    "key": "positionsAction",
     "type": "radio",
     "defaultValue": "usePositionsErrorWhenMissing",
     "templateOptions": {
@@ -30,7 +30,7 @@
       "options": [
         {
           "value": "onlyEmployments",
-          "label": "Only use employements, do not use positions"
+          "label": "Only use employments, do not use positions"
         },
         {
           "value": "usePositionsErrorWhenMissing",
