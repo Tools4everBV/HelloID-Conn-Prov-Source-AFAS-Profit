@@ -16,6 +16,7 @@ function Get-AFASConnectorData {
     )
 
     try {
+        Write-Verbose -Verbose -Message "Starting downloading objects through get-connector '$connector'"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -38,10 +39,11 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-    }
-    catch {
+        Write-Verbose -Verbose -Message "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+    } catch {
         $data.Value = $null
-        Write-Verbose $_.Exception -Verbose
+        Write-Verbose -Verbose -Message "Error occured while downloading data through get-connector '$connector': $($_.Exception.Message) - $($_.ScriptStackTrace)"
+        Throw "A critical error occured. Please see the snapshot log for details..."
     }
 }
 
