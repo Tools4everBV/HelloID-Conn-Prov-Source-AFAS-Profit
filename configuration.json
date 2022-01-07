@@ -1,31 +1,32 @@
 [
-    {
-      "key": "BaseUrl",
-      "type": "input",
-      "templateOptions": {
-        "label": "BaseUrl",
-        "placeholder": "Example: https://12345.rest.afas.online/profitrestservices",
-        "description": "The URL of your Profit environment",
-        "required": true
-      }
-    },
-    {
-      "key": "Token",
-      "type": "input",
-      "templateOptions": {
-        "label": "Token",
-        "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
-        "description": "The AppConnector token to connect to Profit.",
-        "required": true
-      }
-    },
-    {
-      "key": "switchIncludePositions",
-      "type": "checkbox",
-      "defaultValue": false,
-      "templateOptions": {
-        "label": "Include positions",
-        "required": false
-      }
+  {
+    "key": "BaseUrl",
+    "type": "input",
+    "templateOptions": {
+      "label": "BaseUrl",
+      "placeholder": "Example: https://12345.rest.afas.online/profitrestservices",
+      "description": "The URL of your Profit environment",
+      "required": true
     }
-  ]
+  },
+  {
+    "key": "Token",
+    "type": "input",
+    "templateOptions": {
+      "label": "Token",
+      "type": "password",
+      "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
+      "description": "The AppConnector token to connect to Profit.",
+      "required": true
+    }
+  },
+  {
+    "key": "switchIncludePositions",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Include positions",
+      "required": false
+    }
+  }
+]
