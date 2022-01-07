@@ -85,7 +85,7 @@ $persons | ForEach-Object {
                 } else {
                     foreach ($position in $positionList) {
                         foreach ($propery in $employment.psobject.properties) {
-                            Write-Verbose -Verbose "$(propery.MemberType), empl_$($propery.Name) $($propery.Value)"
+                            Write-Verbose -Verbose "$($propery.MemberType), empl_$($propery.Name) $($propery.Value)"
                             $position | Add-Member -MemberType $propery.MemberType -Name "empl_$($propery.Name)" -Value $propery.Value
                         }
                     }
