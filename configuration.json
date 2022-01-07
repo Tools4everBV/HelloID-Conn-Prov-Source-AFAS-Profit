@@ -21,12 +21,26 @@
     }
   },
   {
-    "key": "switchIncludePositions",
-    "type": "checkbox",
-    "defaultValue": false,
+    "key": "positions",
+    "type": "radio",
+    "defaultValue": "usePositionsErrorWhenMissing",
     "templateOptions": {
-      "label": "Include positions",
-      "required": false
+      "label": "What to do with positions?",
+      "description": "Do not change this in a production environment, as this can lead to the revocation of authorizations.",
+      "options": [
+        {
+          "value": "onlyEmployments",
+          "label": "Only use employements, do not use positions"
+        },
+        {
+          "value": "usePositionsErrorWhenMissing",
+          "label": "Use employments and positions, block person when position is missing"
+        },
+        {
+          "value": "usePositionsCreateWhenMissing",
+          "label": "Use employments and positions, create position based on employment"
+        }
+      ]
     }
   }
 ]
