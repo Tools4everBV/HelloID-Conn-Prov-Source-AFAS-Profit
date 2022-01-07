@@ -50,20 +50,20 @@ function Get-AFASConnectorData {
 }
 
 $persons = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users" ([ref]$persons)
+Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
 
 
 $employments = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments" ([ref]$employments)
+Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
 $employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
 # Group the employments
 $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
 ### Example to add boolean values for each group membership
 #$groups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups" ([ref]$groups)
+#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
 #$userGroups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups" ([ref]$userGroups)
+#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
 # Group the group memberships
 #foreach ($group in $groups) {
 #    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($group.groupId)" -Value $false -Force
@@ -73,7 +73,7 @@ $employments = $employments | Group-Object Persoonsnummer -AsHashTable
 
 if ($true -eq $includePositions) {
     $positions = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions" ([ref]$positions)
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
     $positions | Add-Member -MemberType NoteProperty -Name "Type" -Value "position" -Force
     $positions = $positions | Group-Object Persoonsnummer -AsHashTable
 }

@@ -48,7 +48,7 @@ function Get-AFASConnectorData {
 }
 
 $organizationalUnits = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits" ([ref]$organizationalUnits)
+Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
 
 # Export the json
 $json = $organizationalUnits | ConvertTo-Json -Depth 3
