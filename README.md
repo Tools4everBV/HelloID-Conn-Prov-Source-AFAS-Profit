@@ -1,4 +1,11 @@
 # HelloID-Conn-Prov-Source-AFAS-Profit
+
+| :information_source: Information |
+|:---------------------------|
+| This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.       |
+
+<br />
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/68013812/94159371-c1928f80-fe83-11ea-9582-1e4504da8282.png">
 </p>
