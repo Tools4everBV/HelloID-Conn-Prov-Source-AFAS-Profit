@@ -82,6 +82,9 @@ if ($true -eq $includePositions) {
 $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
 $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
+# Make sure persons are unique
+$persons = $persons | Sort-Object Persoonsnummer -Unique
+
 $persons | ForEach-Object {
     $_.ExternalId = $_.Persoonsnummer
     $contracts = $employments[$_.Persoonsnummer]
@@ -106,26 +109,23 @@ $persons | ForEach-Object {
     if ($_.Naamgebruik_code -eq "3") {
         $_.Naamgebruik_code = "BP"
     }
-### Group membership example (person part)
-#    $groupMemberships = $userGroups[$_.Gebruiker]
+    
+    ### Group membership example (person part)
+    #    $groupMemberships = $userGroups[$_.Gebruiker]
 
-#    foreach ($groupMembership in $groupMemberships) {
-#       $_."Role_$($groupMembership.GroupId)" = $True
-#    }
-### End Group membership example (person part)
+    #    foreach ($groupMembership in $groupMemberships) {
+    #       $_."Role_$($groupMembership.GroupId)" = $True
+    #    }
+    ### End Group membership example (person part)
+
+    $person = $_ | ConvertTo-Json -Depth 10
+    $person = $person.Replace("._", "__")
+
+    Write-Output $person
 }
-
-# Make sure persons are unique
-$persons = $persons | Sort-Object ExternalId -Unique
 
 ### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
 #Write-Verbose -Verbose -Message "Filtering out persons without contract data. Before: $($persons.count)"
 #$persons = $persons | Where-Object contracts -ne $null
 #Write-Verbose -Verbose -Message  "Filtered out persons without contract data. After: $($persons.count)"
-
-# Export and sanitize the json
-$json = $persons | ConvertTo-Json -Depth 10
-$json = $json.Replace("._", "__")
-
-Write-Output $json
 Write-Verbose -Verbose -Message "End person import"
