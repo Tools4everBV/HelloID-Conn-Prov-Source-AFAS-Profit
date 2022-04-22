@@ -5,7 +5,6 @@ $VerbosePreference = "SilentlyContinue"
 $InformationPreference = "Continue"
 $WarningPreference = "Continue"
 
-#Region Script
 $c = $configuration | ConvertFrom-Json
 
 $baseUri = $($c.BaseUrl)
