@@ -1,11 +1,3 @@
-$configuration = '
-    {
-        "BaseUrl" : "https://45963.restaccept.afas.online/ProfitRestServices",
-        "Token" : "<token><version>1</version><data>2939CCF0859B4FB8A91C3487A162995A3D35FC8046EF79D8307D3B8720E64C0E</data></token>",
-        "positionsAction" : "usePositions"
-    }
-'
-
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
@@ -96,6 +88,9 @@ $groups | Where-Object {$_.GroupId -in $allowedGroupIds} | ForEach-Object {
 $persons | ForEach-Object {
     # Set required fields for HelloID
     $_.ExternalId = $_.Medewerker
+
+    # Include ExternalId in DisplayName of HelloID Raw Data
+    $_.DisplayNAme = $_.DisplayName + "($($_.ExternalId))" 
 
     $contractsList = [System.Collections.ArrayList]::new()
 
