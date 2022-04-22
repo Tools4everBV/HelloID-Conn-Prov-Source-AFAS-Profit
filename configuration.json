@@ -23,7 +23,7 @@
   {
     "key": "positionsAction",
     "type": "radio",
-    "defaultValue": "usePositionsErrorWhenMissing",
+    "defaultValue": "onlyEmployments",
     "templateOptions": {
       "label": "What to do with positions?",
       "description": "Do not change this in a production environment, as this can lead to the revocation of authorizations.",
@@ -33,12 +33,8 @@
           "label": "Only use employments, do not use positions"
         },
         {
-          "value": "usePositionsErrorWhenMissing",
+          "value": "usePositions",
           "label": "Use employments and positions, block person when position is missing"
-        },
-        {
-          "value": "usePositionsCreateWhenMissing",
-          "label": "Use employments and positions, create position based on employment"
         }
       ]
     }

@@ -1,11 +1,17 @@
-#Region Script
-$connectionSettings = ConvertFrom-Json $configuration
-
-$baseUri = $($connectionSettings.BaseUrl)
-$token = $($connectionSettings.Token)
-
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
+
+$VerbosePreference = "SilentlyContinue"
+$InformationPreference = "Continue"
+$WarningPreference = "Continue"
+
+#Region Script
+$c = $configuration | ConvertFrom-Json
+
+$baseUri = $($c.BaseUrl)
+$token = $($c.Token)
+
+Write-Information "Start person import: Base URL: $baseUri, Using positionsAction: $positionsAction, token length: $($token.length)"
 
 function Get-AFASConnectorData {
     param(
@@ -16,7 +22,7 @@ function Get-AFASConnectorData {
     )
 
     try {
-        Write-Verbose -Verbose -Message "Starting downloading objects through get-connector '$connector'"
+        Write-Information "Starting downloading objects through get-connector '$connector'"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -39,18 +45,21 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-        Write-Verbose -Verbose -Message "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
-    } catch {
+        Write-Information "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+    }
+    catch {
         $data.Value = $null
-        Write-Verbose -Verbose -Message "Error occured while downloading data through get-connector '$connector': $($_.Exception.Message) - $($_.ScriptStackTrace)"
+        Write-Warning "Error occured while downloading data through get-connector '$connector': $($_.Exception.Message) - $($_.ScriptStackTrace)"
         Throw "A critical error occured. Please see the snapshot log for details..."
     }
 }
 
-# V2 Todo: Add warning when there are multiple managers assigned to one department
 $organizationalUnits = [System.Collections.ArrayList]::new()
 Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
 
-# Export the json
-$json = $organizationalUnits | ConvertTo-Json -Depth 3
-Write-Output $json
+$organizationalUnits | ForEach-Object {
+    # Sanitize and export the json
+    $organizationalUnit = $_ | ConvertTo-Json -Depth 10
+
+    Write-Output $organizationalUnit
+}
