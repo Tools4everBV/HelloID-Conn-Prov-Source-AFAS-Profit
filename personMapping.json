@@ -25,6 +25,30 @@
             }
         },
         {
+            "name": "Details.BirthDate",
+            "mode": "field",
+            "value": "Geboortedatum",
+            "validation": {
+                "required": false
+            }
+        },
+        {
+            "name": "Details.BirthLocality",
+            "mode": "field",
+            "value": "Geboorteplaats",
+            "validation": {
+                "required": false
+            }
+        },
+        {
+            "name": "Details.Gender",
+            "mode": "field",
+            "value": "Geslacht",
+            "validation": {
+                "required": false
+            }
+        },
+        {
             "name": "ExternalId",
             "mode": "field",
             "value": "ExternalId",
@@ -227,19 +251,19 @@
             }
         },
         {
-            "name": "Title.Name",
-            "mode": "field",
-            "value": "Functie_omschrijving",
-            "validation": {
-                "required": false
-            }
-        },
-        {
             "name": "Title.ExternalId",
             "mode": "field",
             "value": "Functie_code",
             "validation": {
                 "required": true
+            }
+        },
+        {
+            "name": "Title.Name",
+            "mode": "field",
+            "value": "Functie_omschrijving",
+            "validation": {
+                "required": false
             }
         },
         {
