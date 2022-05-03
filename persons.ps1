@@ -69,19 +69,19 @@ if ($positionsAction -ne "onlyEmployments") {
 }
 
 ### Example to add boolean values for each group membership 1/2
-$groups = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
+# $groups = [System.Collections.ArrayList]::new()
+# Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
 
-$userGroups = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
-$userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
+# $userGroups = [System.Collections.ArrayList]::new()
+# Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
+# $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
 
-#Enhance person object with properties for the groups
-$allowedGroupIds = @("ABB","APL")
+# #Enhance person object with properties for the groups
+# $allowedGroupIds = @("ABB","APL")
 
-$groups | Where-Object {$_.GroupId -in $allowedGroupIds} | ForEach-Object {
-   $persons | Add-Member -MemberType NoteProperty -Name "Role_$($_.GroupId)" -Value $false -Force
-}
+# $groups | Where-Object {$_.GroupId -in $allowedGroupIds} | ForEach-Object {
+#    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($_.GroupId)" -Value $false -Force
+# }
 ## End Example (more configuration required in person loop, see below) 1/2
 
 # $persons = $persons | Where-Object {$_.Medewerker -eq "CarolaZ"}
@@ -149,24 +149,24 @@ $persons | ForEach-Object {
     } else {
         ### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
         ### *** Please consult with the Tools4ever consultant before enabling this code. ***
-        Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
-        return
+        # Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
+        # return
     }
 
 
     ### Group membership example (person part) 2/2
-    if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
-        $groupMemberships = $userGroupsGrouped[$_.Gebruiker]
-        if ($null -ne $groupMemberships){
-            foreach ($groupMembership in ($groupMemberships | Where-Object {$_.GroupId -in $allowedGroupIds}) ) {
-                $_."Role_$($groupMembership.GroupId)" = $true
-            }
-        } else {
-            Write-Verbose "Person $($_.Gebruiker) has no groupmembership (within specified allowed groups)"
-        }
-    } else {
-        Write-Verbose "User $($_.Medewerker) has no linked user"
-    }
+    # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
+    #     $groupMemberships = $userGroupsGrouped[$_.Gebruiker]
+    #     if ($null -ne $groupMemberships){
+    #         foreach ($groupMembership in ($groupMemberships | Where-Object {$_.GroupId -in $allowedGroupIds}) ) {
+    #             $_."Role_$($groupMembership.GroupId)" = $true
+    #         }
+    #     } else {
+    #         Write-Verbose "Person $($_.Gebruiker) has no groupmembership (within specified allowed groups)"
+    #     }
+    # } else {
+    #     Write-Verbose "User $($_.Medewerker) has no linked user"
+    # }
     ### End Group membership example (person part) 2/2
 
     # Sanitize and export the json
