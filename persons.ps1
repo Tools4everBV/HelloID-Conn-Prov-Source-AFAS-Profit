@@ -112,21 +112,23 @@ $persons | ForEach-Object {
         }
     }else {
         if ($null -ne $employments) {
-            # Create custom contract object to include prefix of properties
             $employments | ForEach-Object {
-                $employmentObject = [PSCustomObject]@{}
-                $_.psobject.properties | ForEach-Object {
-                    $employmentObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
-                }
-
                 # Get positions for employment
                 $positions = $positionsGrouped[$_.ExternalID]
 
                 # Add position and employment data to contracts
                 if ($null -ne $positions){
-                    $positions | ForEach-Object {
-                        $positionObject = $employmentObject
+                    foreach($position in $positions){
+                        # Create custom position object to include prefix in properties
+                        $positionObject = [PSCustomObject]@{}
+
+                        # Add employment object with prefix for property names
                         $_.psobject.properties | ForEach-Object {
+                            $positionObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
+                        }
+
+                        # Add position object with prefix for property names
+                        $position.psobject.properties | ForEach-Object {
                             $positionObject | Add-Member -MemberType $_.MemberType -Name "pos_$($_.Name)" -Value $_.Value -Force
                         }
 
@@ -135,6 +137,11 @@ $persons | ForEach-Object {
                     }
                 } else {
                     # Add employment only data to contracts (in case of employments without positions)
+                    $employmentObject = [PSCustomObject]@{}
+                    $_.psobject.properties | ForEach-Object {
+                        $employmentObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
+                    }
+
                     [Void]$contractsList.Add($employmentObject)
                 }
             }            
@@ -152,7 +159,6 @@ $persons | ForEach-Object {
         # Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
         # return
     }
-
 
     ### Group membership example (person part) 2/2
     # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
