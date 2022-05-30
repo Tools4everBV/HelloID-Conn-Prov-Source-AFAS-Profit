@@ -33,12 +33,12 @@
 			}
 		},
 		{
-			"name": "Name.Convention",
-			"mode": "field",
-			"value": "Naamgebruik_code",
-			"validation": {
-				"required": true
-			}
+		    "name": "Name.Convention",
+		    "mode": "complex",
+		    "value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
+		    "validation": {
+			"required": true
+		    }
 		},
 		{
 			"name": "Name.FamilyName",
