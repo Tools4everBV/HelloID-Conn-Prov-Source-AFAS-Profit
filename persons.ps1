@@ -92,19 +92,6 @@ $persons | ForEach-Object {
     # Include ExternalId in DisplayName of HelloID Raw Data
     $_.DisplayNAme = $_.DisplayName + "($($_.ExternalId))" 
     
-    if ($_.Naamgebruik_code -eq "0") {
-        $_.Naamgebruik_code = "B"
-    }
-    if ($_.Naamgebruik_code -eq "1") {
-        $_.Naamgebruik_code = "PB"
-    }
-    if ($_.Naamgebruik_code -eq "2") {
-        $_.Naamgebruik_code = "P"
-    }
-    if ($_.Naamgebruik_code -eq "3") {
-        $_.Naamgebruik_code = "BP"
-    }
-
     $contractsList = [System.Collections.ArrayList]::new()
 
     # Get employments for person
