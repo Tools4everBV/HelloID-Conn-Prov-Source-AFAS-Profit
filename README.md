@@ -1,6 +1,6 @@
 # HelloID-Conn-Prov-Source-AFAS-Profit
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/68013812/94159371-c1928f80-fe83-11ea-9582-1e4504da8282.png">
+  <img src="https://user-images.githubusercontent.com/69046642/176402487-b5943355-39d3-408a-8f14-0699f1301dea.png">
 </p>
 
 <!-- TABLE OF CONTENTS -->
