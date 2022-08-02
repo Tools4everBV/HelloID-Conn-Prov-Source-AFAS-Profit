@@ -46,7 +46,8 @@ function Get-AFASConnectorData {
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
         Write-Information "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
-    } catch {
+    }
+    catch {
         $data.Value = $null
         Write-Warning "Error occured while downloading data through get-connector '$connector': $($_.Exception.Message) - $($_.ScriptStackTrace)"
         Throw "A critical error occured. Please see the snapshot log for details..."
@@ -97,7 +98,7 @@ $persons | ForEach-Object {
     # Get employments for person
     $employments = $employmentsGrouped[$_.Medewerker]
 
-    if($positionsAction -eq "onlyEmployments") {
+    if ($positionsAction -eq "onlyEmployments") {
         if ($null -ne $employments) {
             # Create custom contract object to include prefix of properties
             $employments | ForEach-Object {
@@ -107,18 +108,20 @@ $persons | ForEach-Object {
                 }
                 [Void]$contractsList.Add($employmentObject)
             }
-        } else {
+        }
+        else {
             Write-Warning "No employments found for person: $($_.Medewerker)"  
         }
-    }else {
+    }
+    else {
         if ($null -ne $employments) {
             $employments | ForEach-Object {
                 # Get positions for employment
                 $positions = $positionsGrouped[$_.ExternalID]
 
                 # Add position and employment data to contracts
-                if ($null -ne $positions){
-                    foreach($position in $positions){
+                if ($null -ne $positions) {
+                    foreach ($position in $positions) {
                         # Create custom position object to include prefix in properties
                         $positionObject = [PSCustomObject]@{}
 
@@ -135,7 +138,8 @@ $persons | ForEach-Object {
                         # Add employment and position data to contracts
                         [Void]$contractsList.Add($positionObject)
                     }
-                } else {
+                }
+                else {
                     # Add employment only data to contracts (in case of employments without positions)
                     $employmentObject = [PSCustomObject]@{}
                     $_.psobject.properties | ForEach-Object {
@@ -145,20 +149,28 @@ $persons | ForEach-Object {
                     [Void]$contractsList.Add($employmentObject)
                 }
             }            
-        } else {
+        }
+        else {
             Write-Warning "No employments found for person: $($_.Medewerker)"  
         }
     }
 
     # Add Contracts to person
-    if($null -ne $contractsList){
+    if ($null -ne $contractsList) {
         $_.Contracts = $contractsList
-    } else {
-        ### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
-        ### *** Please consult with the Tools4ever consultant before enabling this code. ***
-        # Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
-        # return
     }
+    # elseif ($contractsList.Count -gt 0) {
+    #     ## This example can be used by the consultant if the you'd want to filter out persons with an empty array as contract
+    #     ## *** Please consult with the Tools4ever consultant before enabling this code. ***
+    #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
+    #     return
+    # }
+    # elseif ($null -eq $contractsList) {
+    #     ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
+    #     ## *** Please consult with the Tools4ever consultant before enabling this code. ***
+    #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
+    #     return
+    # }
 
     ### Group membership example (person part) 2/2
     # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
