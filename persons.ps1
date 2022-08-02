@@ -159,7 +159,7 @@ $persons | ForEach-Object {
     if ($null -ne $contractsList) {
         $_.Contracts = $contractsList
     }
-    # elseif ($contractsList.Count -gt 0) {
+    # elseif ($contractsList.Count -eq 0) {
     #     ## This example can be used by the consultant if the you'd want to filter out persons with an empty array as contract
     #     ## *** Please consult with the Tools4ever consultant before enabling this code. ***
     #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
