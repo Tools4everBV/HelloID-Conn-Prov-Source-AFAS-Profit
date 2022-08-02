@@ -157,19 +157,19 @@ $persons | ForEach-Object {
 
     # Add Contracts to person
     if ($null -ne $contractsList) {
-        if ($contractsList.Count -gt 0) {
-            $_.Contracts = $contractsList
-        }
-        # else {
-        #     ## This example can be used by the consultant if the you'd want to filter out persons with an empty array as contract
-        #     ## *** Please consult with the Tools4ever consultant before enabling this code. ***
+        ## This example can be used by the consultant if you want to filter out persons with an empty array as contract
+        ## *** Please consult with the Tools4ever consultant before enabling this code. ***
+        # if ($contractsList.Count -eq 0) {
         #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
         #     return
         # }
+        # else {
+            $_.Contracts = $contractsList
+        # }
     }
+    ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
+    ## *** Please consult with the Tools4ever consultant before enabling this code. ***    
     # else {
-    #     ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
-    #     ## *** Please consult with the Tools4ever consultant before enabling this code. ***
     #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
     #     return
     # }
