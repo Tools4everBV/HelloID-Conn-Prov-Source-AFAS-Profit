@@ -33,12 +33,12 @@
 			}
 		},
 		{
-		    "name": "Name.Convention",
-		    "mode": "complex",
-		    "value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
-		    "validation": {
-			"required": true
-		    }
+			"name": "Name.Convention",
+			"mode": "complex",
+			"value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
+			"validation": {
+				"required": true
+			}
 		},
 		{
 			"name": "Name.FamilyName",
@@ -149,7 +149,7 @@
 		{
 			"name": "Details.Percentage",
 			"mode": "field",
-			"value": "empl_Parttime_percentage",
+			"value": "empl_Percentage",
 			"validation": {
 				"required": false
 			}
@@ -165,15 +165,15 @@
 		{
 			"name": "EndDate",
 			"mode": "field",
-			"value": "empl_Einddatum_contract",
+			"value": "empl_Einddatum_functie",
 			"validation": {
 				"required": false
 			}
 		},
 		{
 			"name": "ExternalId",
-			"mode": "field",
-			"value": "empl_ExternalID",
+			"mode": "complex",
+			"value": "sourceContract.empl_ExternalID + '~' + sourceContract.empl_EmploymentExternalID",
 			"validation": {
 				"required": true
 			}
@@ -187,25 +187,9 @@
 			}
 		},
 		{
-			"name": "Organization.ExternalId",
-			"mode": "field",
-			"value": "empl_Werkgever_code",
-			"validation": {
-				"required": false
-			}
-		},
-		{
-			"name": "Organization.Name",
-			"mode": "field",
-			"value": "empl_Werkgever_omschrijving",
-			"validation": {
-				"required": false
-			}
-		},
-		{
 			"name": "StartDate",
 			"mode": "field",
-			"value": "empl_Begindatum_contract",
+			"value": "empl_Begindatum_functie",
 			"validation": {
 				"required": true
 			}
@@ -221,7 +205,7 @@
 		{
 			"name": "Title.Name",
 			"mode": "field",
-			"value": "pos_Functie_omschrijving",
+			"value": "empl_Functie_omschrijving",
 			"validation": {
 				"required": false
 			}
@@ -238,6 +222,54 @@
 			"name": "Type.Description",
 			"mode": "field",
 			"value": "empl_Soort_medewerker",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Name",
+			"mode": "field",
+			"value": "empl_Werkgever_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.ExternalId",
+			"mode": "field",
+			"value": "empl_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Code",
+			"mode": "field",
+			"value": "empl_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Department.DisplayName",
+			"mode": "field",
+			"value": "empl_Organisatorische_eenheid_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Title.Code",
+			"mode": "field",
+			"value": "empl_Functie_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "CostCenter.Code",
+			"mode": "field",
+			"value": "empl_Kostenplaats_code",
 			"validation": {
 				"required": false
 			}

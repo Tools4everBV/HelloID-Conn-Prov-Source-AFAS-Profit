@@ -33,12 +33,12 @@
 			}
 		},
 		{
-		    "name": "Name.Convention",
-		    "mode": "complex",
-		    "value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
-		    "validation": {
-			"required": true
-		    }
+			"name": "Name.Convention",
+			"mode": "complex",
+			"value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
+			"validation": {
+				"required": true
+			}
 		},
 		{
 			"name": "Name.FamilyName",
@@ -187,22 +187,6 @@
 			}
 		},
 		{
-			"name": "Organization.ExternalId",
-			"mode": "field",
-			"value": "pos_Organisatorische_eenheid_code",
-			"validation": {
-				"required": false
-			}
-		},
-		{
-			"name": "Organization.Name",
-			"mode": "field",
-			"value": "pos_Werkgever_omschrijving",
-			"validation": {
-				"required": false
-			}
-		},
-		{
 			"name": "StartDate",
 			"mode": "field",
 			"value": "pos_Begindatum_functie",
@@ -238,6 +222,54 @@
 			"name": "Type.Description",
 			"mode": "field",
 			"value": "empl_Soort_medewerker",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Name",
+			"mode": "field",
+			"value": "pos_Werkgever_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.ExternalId",
+			"mode": "field",
+			"value": "pos_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Code",
+			"mode": "field",
+			"value": "pos_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Department.DisplayName",
+			"mode": "field",
+			"value": "pos_Organisatorische_eenheid_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Title.Code",
+			"mode": "field",
+			"value": "pos_Functie_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "CostCenter.Code",
+			"mode": "field",
+			"value": "pos_Kostenplaats_code",
 			"validation": {
 				"required": false
 			}
