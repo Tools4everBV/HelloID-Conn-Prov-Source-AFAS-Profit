@@ -22,12 +22,12 @@ function Get-AFASConnectorData {
     )
 
     try {
-        Write-Information "Starting downloading objects through get-connector '$connector'"
+        Write-Verbose "Starting downloading objects through get-connector '$connector'"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
 
-        $take = 100
+        $take = 1000
         $skip = 0
 
         $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
@@ -45,7 +45,7 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-        Write-Information "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+        Write-Verbose "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
     }
     catch {
         $data.Value = $null
@@ -54,144 +54,311 @@ function Get-AFASConnectorData {
     }
 }
 
-$persons = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
-$persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
-$persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
+# Query Persons
+try {
+    Write-Verbose "Querying Persons"
 
-$employments = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
-$employmentsGrouped = $employments | Group-Object Medewerker -AsHashTable
+    $persons = [System.Collections.ArrayList]::new()
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
 
-if ($positionsAction -ne "onlyEmployments") {
-    $positions = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
-    $positionsGrouped = $positions | Group-Object EmploymentExternalID -AsHashTable
+    # Sort on Medewerker (to make sure the order is always the same)
+    $persons = $persons | Sort-Object -Property Medewerker
+
+    Write-Information "Succesfully queried Persons. Result count: $($persons.count)"
+}
+catch {
+    $ex = $PSItem
+    Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+    throw "Could not query Persons. Error: $($ex.Exception.Message)"
 }
 
-### Example to add boolean values for each group membership 1/2
-# $groups = [System.Collections.ArrayList]::new()
-# Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
+# Query OrganizationalUnits
+try {
+    Write-Verbose "Querying OrganizationalUnits"
 
-# $userGroups = [System.Collections.ArrayList]::new()
-# Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
-# $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
+    $organizationalUnits = [System.Collections.ArrayList]::new()
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
+    
+    # Sort on ExternalId (to make sure the order is always the same)
+    $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
 
-# #Enhance person object with properties for the groups
-# $allowedGroupIds = @("ABB","APL")
+    # Group on ExternalId (to match to employments and positions)
+    $organizationalUnitsGrouped = $organizationalUnits | Group-Object ExternalId -AsString -AsHashTable
 
-# $groups | Where-Object {$_.GroupId -in $allowedGroupIds} | ForEach-Object {
-#    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($_.GroupId)" -Value $false -Force
+    Write-Information "Succesfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
+}
+catch {
+    $ex = $PSItem
+    Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+    throw "Could not query OrganizationalUnits. Error: $($ex.Exception.Message)"
+}
+
+# Query Employments
+try {
+    Write-Verbose "Querying Employments"
+
+    $employments = [System.Collections.ArrayList]::new()
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
+
+    # Sort on ExternalID (to make sure the order is always the same)
+    $employments = $employments | Sort-Object -Property ExternalID
+
+    # Add extra data to employment object
+    $employments | Foreach-Object {
+        # Add all organizational units (all "layers") to employment object
+        $allDepartments = [System.Collections.ArrayList]::new()
+        $deparmentId = [String]$_.Organisatorische_eenheid_code
+        $department = $organizationalUnitsGrouped["$deparmentId"]
+        if ($null -ne $department) {
+            [void]$allDepartments.add($department)
+            while (-NOT[String]::IsNullOrEmpty([String]$department.ParentExternalId)) {
+                $deparmentParentId = $department.ParentExternalId
+                if (-NOT[String]::IsNullOrEmpty([String]$deparmentParentId)) {
+                    # In case multiple departments are found with same id, always select first we encounter
+                    $department = $organizationalUnitsGrouped["$deparmentParentId"] | Select-Object -First 1
+                    [void]$allDepartments.add($department)
+                }
+            }
+        }
+        # Add a single property with a comma seperated list of values to employment object
+        $_ | Add-Member -MemberType NoteProperty -Name "All_Department_ExternalIds" -Value ('"{0}"' -f ($allDepartments.ExternalId -Join '","')) -Force
+    }
+
+    # Group on Medewerker (to match to medewerker)
+    $employmentsGrouped = $employments | Group-Object Medewerker -AsHashTable
+
+    Write-Information "Succesfully queried Employments. Result count: $($employments.count)"
+}
+catch {
+    $ex = $PSItem
+    Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+    throw "Could not query Employments. Error: $($ex.Exception.Message)"
+}
+
+# Query Positions
+if ($positionsAction -ne "onlyEmployments") {
+    try {
+        Write-Verbose "Querying Positions"
+
+        $positions = [System.Collections.ArrayList]::new()
+        Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
+
+        # Sort on ExternalID (to make sure the order is always the same)
+        $positions = $positions | Sort-Object -Property ExternalID
+
+        # Add extra data to position object
+        $positions | Foreach-Object {
+            # Add all organizational units (all "layers") to position object
+            $allDepartments = [System.Collections.ArrayList]::new()
+            $deparmentId = [String]$_.Organisatorische_eenheid_code
+            $department = $organizationalUnitsGrouped["$deparmentId"]
+            if ($null -ne $department) {
+                [void]$allDepartments.add($department)
+                while (-NOT[String]::IsNullOrEmpty([String]$department.ParentExternalId)) {
+                    $deparmentParentId = $department.ParentExternalId
+                    if (-NOT[String]::IsNullOrEmpty([String]$deparmentParentId)) {
+                        # In case multiple departments are found with same id, always select first we encounter
+                        $department = $organizationalUnitsGrouped["$deparmentParentId"] | Select-Object -First 1
+                        [void]$allDepartments.add($department)
+                    }
+                }
+            }
+            # Add a single property with a comma seperated list of values to position object
+            $_ | Add-Member -MemberType NoteProperty -Name "All_Department_ExternalIds" -Value ('"{0}"' -f ($allDepartments.ExternalId -Join '","')) -Force
+        }
+
+        # Group on EmploymentExternalID (to match to employment)
+        $positionsGrouped = $positions | Group-Object EmploymentExternalID -AsHashTable
+
+        Write-Information "Succesfully queried Positions. Result count: $($positions.count)"
+    }
+    catch {
+        $ex = $PSItem
+        Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+        throw "Could not query Positions. Error: $($ex.Exception.Message)"
+    }
+}
+
+## Example to add boolean values for each group membership 1/2
+# try{
+#     Write-Verbose "Querying Groups"
+
+#     $groups = [System.Collections.ArrayList]::new()
+#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
+
+#     Write-Information "Succesfully queried Groups. Result count: $($groups.count)"
+# }
+# catch {
+#     $ex = $PSItem
+#     Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+#     throw "Could not query Groups. Error: $($ex.Exception.Message)"
+# }
+
+# try{
+#     Write-Verbose "Querying UserGroups"
+
+#     $userGroups = [System.Collections.ArrayList]::new()
+#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
+
+#     # Group on UserId (to match to user)
+#     $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
+
+#     Write-Information "Succesfully queried UserGroups. Result count: $($userGroups.count)"
+# }
+# catch {
+#     $ex = $PSItem
+#     Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+#     throw "Could not query UserGroups. Error: $($ex.Exception.Message)"
+# }
+
+# try {
+#     Write-Verbose 'Enhancing person objects with groups'
+
+#     # Enhance person object with properties for the groups
+#     $allowedGroupIds = @("ABB","APL")
+
+#     $groups | Where-Object {$_.GroupId -in $allowedGroupIds} | ForEach-Object {
+#         $persons | Add-Member -MemberType NoteProperty -Name "Role_$($_.GroupId)" -Value $false -Force
+#     }
+
+#     Write-Information "Succesfully enhanced person objects with groups"
+# }
+# catch {
+#     $ex = $PSItem
+#     Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+#     throw "Could not enhance person objects with groups. Error: $($ex.Exception.Message)"
 # }
 ## End Example (more configuration required in person loop, see below) 1/2
 
-# $persons = $persons | Where-Object {$_.Medewerker -eq "CarolaZ"}
-$persons | ForEach-Object {
-    # Set required fields for HelloID
-    $_.ExternalId = $_.Medewerker
+# $persons = $persons | Where-Object {$_.medewerker -eq "19375"}
+try {
+    Write-Verbose 'Enhancing and exporting person objects to HelloID'
 
-    # Include ExternalId in DisplayName of HelloID Raw Data
-    $_.DisplayNAme = $_.DisplayName + "($($_.ExternalId))" 
+    # Set counter to keep track of actual exported person objects
+    $exportedPersons = 0
+
+    # Enahnce person model with required properties
+    $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
+    $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
+
+    $persons | ForEach-Object {
+        # Set required fields for HelloID
+        $_.ExternalId = $_.Medewerker
+
+        # Include ExternalId in DisplayName of HelloID Raw Data
+        $_.DisplayNAme = $_.DisplayName + " ($($_.ExternalId))" 
     
-    $contractsList = [System.Collections.ArrayList]::new()
+        $contractsList = [System.Collections.ArrayList]::new()
 
-    # Get employments for person
-    $employments = $employmentsGrouped[$_.Medewerker]
+        # Get employments for person
+        $employments = $employmentsGrouped[$_.Medewerker]
 
-    if ($positionsAction -eq "onlyEmployments") {
-        if ($null -ne $employments) {
-            # Create custom contract object to include prefix of properties
-            $employments | ForEach-Object {
-                $employmentObject = [PSCustomObject]@{}
-                $_.psobject.properties | ForEach-Object {
-                    $employmentObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
-                }
-                [Void]$contractsList.Add($employmentObject)
-            }
-        }
-        else {
-            Write-Warning "No employments found for person: $($_.Medewerker)"  
-        }
-    }
-    else {
-        if ($null -ne $employments) {
-            $employments | ForEach-Object {
-                # Get positions for employment
-                $positions = $positionsGrouped[$_.ExternalID]
-
-                # Add position and employment data to contracts
-                if ($null -ne $positions) {
-                    foreach ($position in $positions) {
-                        # Create custom position object to include prefix in properties
-                        $positionObject = [PSCustomObject]@{}
-
-                        # Add employment object with prefix for property names
-                        $_.psobject.properties | ForEach-Object {
-                            $positionObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
-                        }
-
-                        # Add position object with prefix for property names
-                        $position.psobject.properties | ForEach-Object {
-                            $positionObject | Add-Member -MemberType $_.MemberType -Name "pos_$($_.Name)" -Value $_.Value -Force
-                        }
-
-                        # Add employment and position data to contracts
-                        [Void]$contractsList.Add($positionObject)
-                    }
-                }
-                else {
-                    # Add employment only data to contracts (in case of employments without positions)
+        if ($positionsAction -eq "onlyEmployments") {
+            if ($null -ne $employments) {
+                # Create custom contract object to include prefix of properties
+                $employments | ForEach-Object {
                     $employmentObject = [PSCustomObject]@{}
                     $_.psobject.properties | ForEach-Object {
                         $employmentObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
                     }
-
                     [Void]$contractsList.Add($employmentObject)
                 }
-            }            
+            }
+            else {
+                Write-Warning "No employments found for person: $($_.Medewerker)"  
+            }
         }
         else {
-            Write-Warning "No employments found for person: $($_.Medewerker)"  
-        }
-    }
+            if ($null -ne $employments) {
+                $employments | ForEach-Object {
+                    # Get positions for employment
+                    $positions = $positionsGrouped[$_.ExternalID]
 
-    # Add Contracts to person
-    if ($null -ne $contractsList) {
-        ## This example can be used by the consultant if you want to filter out persons with an empty array as contract
-        ## *** Please consult with the Tools4ever consultant before enabling this code. ***
-        # if ($contractsList.Count -eq 0) {
-        #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
+                    # Add position and employment data to contracts
+                    if ($null -ne $positions) {
+                        foreach ($position in $positions) {
+                            # Create custom position object to include prefix in properties
+                            $positionObject = [PSCustomObject]@{}
+
+                            # Add employment object with prefix for property names
+                            $_.psobject.properties | ForEach-Object {
+                                $positionObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
+                            }
+
+                            # Add position object with prefix for property names
+                            $position.psobject.properties | ForEach-Object {
+                                $positionObject | Add-Member -MemberType $_.MemberType -Name "pos_$($_.Name)" -Value $_.Value -Force
+                            }
+
+                            # Add employment and position data to contracts
+                            [Void]$contractsList.Add($positionObject)
+                        }
+                    }
+                    else {
+                        # Add employment only data to contracts (in case of employments without positions)
+                        $employmentObject = [PSCustomObject]@{}
+                        $_.psobject.properties | ForEach-Object {
+                            $employmentObject | Add-Member -MemberType $_.MemberType -Name "empl_$($_.Name)" -Value $_.Value -Force
+                        }
+
+                        [Void]$contractsList.Add($employmentObject)
+                    }
+                }            
+            }
+            else {
+                Write-Warning "No employments found for person: $($_.Medewerker)"  
+            }
+        }
+
+        # Add Contracts to person
+        if ($null -ne $contractsList) {
+            ## This example can be used by the consultant if you want to filter out persons with an empty array as contract
+            ## *** Please consult with the Tools4ever consultant before enabling this code. ***
+            # if ($contractsList.Count -eq 0) {
+            #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
+            #     return
+            # }
+            # else {
+            $_.Contracts = $contractsList
+            # }
+        }
+        ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
+        ## *** Please consult with the Tools4ever consultant before enabling this code. ***    
+        # else {
+        #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
         #     return
         # }
-        # else {
-            $_.Contracts = $contractsList
+
+        ## Group membership example (person part) 2/2
+        # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
+        #     $groupMemberships = $userGroupsGrouped[$_.Gebruiker]
+        #     if ($null -ne $groupMemberships){
+        #         foreach ($groupMembership in ($groupMemberships | Where-Object {$_.GroupId -in $allowedGroupIds}) ) {
+        #             $_."Role_$($groupMembership.GroupId)" = $true
+        #         }
+        #     } else {
+        #         Write-Verbose "Person $($_.Gebruiker) has no groupmembership (within specified allowed groups)"
+        #     }
+        # } else {
+        #     Write-Verbose "User $($_.Medewerker) has no linked user"
         # }
+        ## End Group membership example (person part) 2/2
+
+        # Sanitize and export the json
+        $person = $_ | ConvertTo-Json -Depth 10
+        $person = $person.Replace("._", "__")
+        $person = $person.Replace("E-mail", "Email") # HelloID doesn't support properties with '-' in the name, sanitize this
+
+        Write-Output $person
+
+        # Updated counter to keep track of actual exported person objects
+        $exportedPersons++
     }
-    ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
-    ## *** Please consult with the Tools4ever consultant before enabling this code. ***    
-    # else {
-    #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
-    #     return
-    # }
-
-    ### Group membership example (person part) 2/2
-    # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){
-    #     $groupMemberships = $userGroupsGrouped[$_.Gebruiker]
-    #     if ($null -ne $groupMemberships){
-    #         foreach ($groupMembership in ($groupMemberships | Where-Object {$_.GroupId -in $allowedGroupIds}) ) {
-    #             $_."Role_$($groupMembership.GroupId)" = $true
-    #         }
-    #     } else {
-    #         Write-Verbose "Person $($_.Gebruiker) has no groupmembership (within specified allowed groups)"
-    #     }
-    # } else {
-    #     Write-Verbose "User $($_.Medewerker) has no linked user"
-    # }
-    ### End Group membership example (person part) 2/2
-
-    # Sanitize and export the json
-    $person = $_ | ConvertTo-Json -Depth 10
-    $person = $person.Replace("._", "__")
-
-    Write-Output $person
+    Write-Information "Succesfully enhanced and exported person objects to HelloID. Result count: $($exportedPersons)"
+    Write-Information "Person import completed"
+}
+catch {
+    $ex = $PSItem
+    Write-Warning "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error message: $($ex)"
+    throw "Could not enhance and export person objects to HelloID. Error: $($ex.Exception.Message)"
 }
