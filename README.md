@@ -6,6 +6,7 @@
 ## Versioning
 | Version | Description | Date |
 | - | - | - |
+| 2.0.0   | Final version of v2 connector | 2022/08/30  |
 | 1.1.1   | Performance and logging upgrade | 2022/08/09  |
 | 1.1.0   | V2 version | 2022/05/23  |
 | 1.0.0   | Initial release | 2020/07/24  |
@@ -68,11 +69,11 @@ The following settings are required to connect to the API.
 
 The following GetConnectors are required by HelloID when the system is defined as source system: 
 
+*	Tools4ever - HelloID - T4E_HelloID_Users_v2
 *	Tools4ever - HelloID - T4E_HelloID_Employments_v2
 *	Tools4ever - HelloID - T4E_HelloID_Positions_v2
-*	Tools4ever - HelloID - T4E_HelloID_Groups_v2
 *	Tools4ever - HelloID - T4E_HelloID_OrganizationalUnits_v2
-*	Tools4ever - HelloID - T4E_HelloID_Users_v2
+*	Tools4ever - HelloID - T4E_HelloID_Groups_v2
 *	Tools4ever - HelloID - T4E_HelloID_UserGroups_v2
 
 ### Remarks
