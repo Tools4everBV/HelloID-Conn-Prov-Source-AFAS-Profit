@@ -1,0 +1,278 @@
+{
+	"personMappings": [
+		{
+			"name": "Contact.Business.Email",
+			"mode": "field",
+			"value": "Email_werk",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Contact.Business.Phone.Fixed",
+			"mode": "field",
+			"value": "Telefoonnr_werk",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Contact.Business.Phone.Mobile",
+			"mode": "field",
+			"value": "Mobielnr_werk",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "ExternalId",
+			"mode": "field",
+			"value": "ExternalId",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Name.Convention",
+			"mode": "complex",
+			"value": "switch (source.Naamgebruik_code) {\r\n    case \"0\": {\r\n        \"B\"\r\n        break;\r\n    }\r\n    case \"1\": {\r\n        \"PB\"\r\n        break;\r\n    }\r\n    case \"2\": {\r\n        \"P\"\r\n        break;\r\n    }\r\n    case \"3\": {\r\n        \"BP\"\r\n        break;\r\n    }\r\n    default: {\r\n        \"B\"\r\n    }\r\n}",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Name.FamilyName",
+			"mode": "field",
+			"value": "Geboortenaam",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Name.FamilyNamePartner",
+			"mode": "field",
+			"value": "Geboortenaam_partner",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Name.FamilyNamePartnerPrefix",
+			"mode": "field",
+			"value": "Voorvoegsel_partner",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Name.FamilyNamePrefix",
+			"mode": "field",
+			"value": "Voorvoegsel",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Name.GivenName",
+			"mode": "field",
+			"value": "Voornaam",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Name.Initials",
+			"mode": "field",
+			"value": "Voorletters",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Name.NickName",
+			"mode": "field",
+			"value": "Roepnaam",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "UserName",
+			"mode": "field",
+			"value": "UPN",
+			"validation": {
+				"required": false
+			}
+		}
+	],
+	"contractMappings": [
+		{
+			"name": "CostCenter.ExternalId",
+			"mode": "field",
+			"value": "pos_Kostenplaats_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "CostCenter.Name",
+			"mode": "field",
+			"value": "pos_Kostenplaats_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Department.ExternalId",
+			"mode": "field",
+			"value": "pos_Organisatorische_eenheid_code",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Details.Fte",
+			"mode": "field",
+			"value": "empl_FTE",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Details.HoursPerWeek",
+			"mode": "field",
+			"value": "empl_Uren_per_week",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Details.Percentage",
+			"mode": "field",
+			"value": "pos_Percentage",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Details.Sequence",
+			"mode": "field",
+			"value": "empl_Volgnummer_contract",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "EndDate",
+			"mode": "field",
+			"value": "pos_Einddatum_functie",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "ExternalId",
+			"mode": "complex",
+			"value": "sourceContract.pos_ExternalID + '~' + sourceContract.pos_EmploymentExternalID",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Manager.ExternalId",
+			"mode": "field",
+			"value": "pos_Persoonsnummer_leidinggevende",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "StartDate",
+			"mode": "field",
+			"value": "pos_Begindatum_functie",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Title.ExternalId",
+			"mode": "field",
+			"value": "pos_Functie_code",
+			"validation": {
+				"required": true
+			}
+		},
+		{
+			"name": "Title.Name",
+			"mode": "field",
+			"value": "pos_Functie_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Type.Code",
+			"mode": "field",
+			"value": "empl_Soort_medewerker_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Type.Description",
+			"mode": "field",
+			"value": "empl_Soort_medewerker",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Name",
+			"mode": "field",
+			"value": "pos_Werkgever_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.ExternalId",
+			"mode": "field",
+			"value": "pos_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Employer.Code",
+			"mode": "field",
+			"value": "pos_Werkgever_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Department.DisplayName",
+			"mode": "field",
+			"value": "pos_Organisatorische_eenheid_omschrijving",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "Title.Code",
+			"mode": "field",
+			"value": "pos_Functie_code",
+			"validation": {
+				"required": false
+			}
+		},
+		{
+			"name": "CostCenter.Code",
+			"mode": "field",
+			"value": "pos_Kostenplaats_code",
+			"validation": {
+				"required": false
+			}
+		}
+	]
+}

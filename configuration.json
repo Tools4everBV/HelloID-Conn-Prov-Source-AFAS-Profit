@@ -14,6 +14,7 @@
     "type": "input",
     "templateOptions": {
       "label": "Token",
+<<<<<<< HEAD
       "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
       "description": "The AppConnector token to connect to Profit.",
       "required": true,
@@ -26,6 +27,40 @@
     "defaultValue": false,
     "templateOptions": {
       "label": "Include positions",
+=======
+      "type": "password",
+      "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
+      "description": "The AppConnector token to connect to Profit.",
+      "required": true
+    }
+  },
+  {
+    "key": "positionsAction",
+    "type": "radio",
+    "defaultValue": "onlyEmployments",
+    "templateOptions": {
+      "label": "What to do with positions?",
+      "description": "Do not change this in a production environment, as this can lead to the revocation of authorizations.",
+      "options": [
+        {
+          "value": "onlyEmployments",
+          "label": "Only use employments, do not use positions"
+        },
+        {
+          "value": "usePositions",
+          "label": "Use employments and positions, block person when position is missing"
+        }
+      ]
+    }
+  },
+  {
+    "key": "isDebug",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Toggle debug logging",
+      "description": "When toggled, debug logging will be displayed",
+>>>>>>> v2-wip
       "required": false
     }
   }
