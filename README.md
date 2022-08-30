@@ -1,4 +1,7 @@
-# HelloID-Conn-Prov-Source-AFAS-Profit
+| :information_source: Information |
+|:---------------------------|
+| This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.       |
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/69046642/176402487-b5943355-39d3-408a-8f14-0699f1301dea.png">
 </p>
@@ -13,20 +16,19 @@
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
-- [HelloID-Conn-Prov-Source-AFAS-Profit](#helloid-conn-prov-source-afas-profit)
-  - [Versioning](#versioning)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Getting Started](#getting-started)
-    - [Connection settings](#connection-settings)
-    - [Prerequisites](#prerequisites)
-    - [Source](#source)
-    - [Remarks](#remarks)
-    - [Mappings](#mappings)
-    - [Scope](#scope)
-    - [Target](#target)
-  - [Getting help](#getting-help)
-  - [HelloID docs](#helloid-docs)
+- [Versioning](#versioning)
+- [Table of Contents](#table-of-contents)
+- [Introduction](#introduction)
+- [Getting Started](#getting-started)
+  - [Connection settings](#connection-settings)
+  - [Prerequisites](#prerequisites)
+  - [Source](#source)
+  - [Remarks](#remarks)
+  - [Mappings](#mappings)
+  - [Scope](#scope)
+  - [Target](#target)
+- [Getting help](#getting-help)
+- [HelloID docs](#helloid-docs)
 
 
 ## Introduction
