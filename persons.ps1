@@ -89,88 +89,6 @@ function Get-AFASConnectorData {
     catch {
         $data.Value = $null
 
-<<<<<<< HEAD
-$persons = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users" ([ref]$persons)
-
-
-$employments = [System.Collections.ArrayList]::new()
-Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments" ([ref]$employments)
-$employments | Add-Member -MemberType NoteProperty -Name "Type" -Value "employment" -Force
-# Group the employments
-$employments = $employments | Group-Object Persoonsnummer -AsHashTable
-
-### Example to add boolean values for each group membership
-#$groups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups" ([ref]$groups)
-#$userGroups = [System.Collections.ArrayList]::new()
-#Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups" ([ref]$userGroups)
-# Group the group memberships
-#foreach ($group in $groups) {
-#    $persons | Add-Member -MemberType NoteProperty -Name "Role_$($group.groupId)" -Value $false -Force
-#}
-#$userGroups = $userGroups | Group-Object UserId -AsHashTable
-## End Example (more configuration required in person loop, see below)
-
-if ($true -eq $includePositions) {
-    $positions = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions" ([ref]$positions)
-    $positions | Add-Member -MemberType NoteProperty -Name "Type" -Value "position" -Force
-    $positions = $positions | Group-Object Persoonsnummer -AsHashTable
-}
-
-# Extend the persons with positions and required fields
-$persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
-$persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
-
-# Make sure persons are unique
-$persons = $persons | Sort-Object Persoonsnummer -Unique
-
-$persons | ForEach-Object {
-    $_.ExternalId = $_.Persoonsnummer
-    $contracts = $employments[$_.Persoonsnummer]
-    if ($null -ne $contracts) {
-        $_.Contracts = $contracts
-    }
-    if($true -eq $includePositions) {
-        $positionExtension = $positions[$_.Persoonsnummer]
-        if ($null -ne $positionExtension) {
-            $_.Contracts += $positionExtension
-        }
-    }
-    if ($_.Naamgebruik_code -eq "0") {
-        $_.Naamgebruik_code = "B"
-    }
-    if ($_.Naamgebruik_code -eq "1") {
-        $_.Naamgebruik_code = "PB"
-    }
-    if ($_.Naamgebruik_code -eq "2") {
-        $_.Naamgebruik_code = "P"
-    }
-    if ($_.Naamgebruik_code -eq "3") {
-        $_.Naamgebruik_code = "BP"
-    }
-    
-    ### Group membership example (person part)
-    #    $groupMemberships = $userGroups[$_.Gebruiker]
-
-    #    foreach ($groupMembership in $groupMemberships) {
-    #       $_."Role_$($groupMembership.GroupId)" = $True
-    #    }
-    ### End Group membership example (person part)
-
-    $person = $_ | ConvertTo-Json -Depth 10
-    $person = $person.Replace("._", "__")
-
-    Write-Output $person
-}
-
-### This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
-#Write-Verbose -Verbose -Message "Filtering out persons without contract data. Before: $($persons.count)"
-#$persons = $persons | Where-Object contracts -ne $null
-#Write-Verbose -Verbose -Message  "Filtered out persons without contract data. After: $($persons.count)"
-Write-Verbose -Verbose -Message "End person import"
-=======
         $ex = $PSItem
         if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
             $errorObject = Resolve-HTTPError -Error $ex
@@ -631,4 +549,3 @@ catch {
     Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
     throw "Could not enhance and export person objects to HelloID. Error: $auditErrorMessage"
 }
->>>>>>> v2-wip
