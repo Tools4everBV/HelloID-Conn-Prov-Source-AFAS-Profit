@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Source-AFAS-Profit-Departments
 #
-# Version: 1.2.0
+# Version: 2.0.0
 #####################################################
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
