@@ -14,20 +14,6 @@
     "type": "input",
     "templateOptions": {
       "label": "Token",
-<<<<<<< HEAD
-      "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
-      "description": "The AppConnector token to connect to Profit.",
-      "required": true,
-      "type": "password"
-    }
-  },
-  {
-    "key": "switchIncludePositions",
-    "type": "checkbox",
-    "defaultValue": false,
-    "templateOptions": {
-      "label": "Include positions",
-=======
       "type": "password",
       "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
       "description": "The AppConnector token to connect to Profit.",
@@ -60,7 +46,6 @@
     "templateOptions": {
       "label": "Toggle debug logging",
       "description": "When toggled, debug logging will be displayed",
->>>>>>> v2-wip
       "required": false
     }
   }
