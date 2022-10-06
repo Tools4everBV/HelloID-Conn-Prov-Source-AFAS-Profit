@@ -64,6 +64,7 @@ The following settings are required to connect to the API.
 - [ ] Loaded and available AFAS GetConnectors.
 - [ ] AFAS App Connector with access to the GetConnectors and associated views.
   - [ ] Token for this AppConnector
+  
 
 ### Source
 
@@ -78,6 +79,7 @@ The following GetConnectors are required by HelloID when the system is defined a
 
 ### Remarks
  - In view of GDPR, the persons private data, such as private email address and birthdate are not in the data collection by default. When needed for the implementation (e.g. for person aggregation), these properties will have to be added.
+ - This connector only supports the use of either employments or positions, not a combination of both! So when using positions, all employees are required to have positions. for more information, please see the AFAS [documentation](https://help.afas.nl/help/nl/se/Hrm_Config_OrgCht_Format.htm#o46970:~:text=van%20de%20functieregel.-,Ontbrekende%20formatieregels,-Als%20je%20de).
 
 ### Mappings
 A basic mapping is provided. Make sure to further customize these accordingly.
