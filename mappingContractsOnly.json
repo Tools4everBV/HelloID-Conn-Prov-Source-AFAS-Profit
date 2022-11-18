@@ -172,8 +172,8 @@
 		},
 		{
 			"name": "ExternalId",
-			"mode": "complex",
-			"value": "sourceContract.empl_ExternalID + '~' + sourceContract.empl_EmploymentExternalID",
+			"mode": "field",
+			"value": "empl_ExternalID",
 			"validation": {
 				"required": true
 			}
