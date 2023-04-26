@@ -181,7 +181,7 @@
 		{
 			"name": "Manager.ExternalId",
 			"mode": "field",
-			"value": "pos_Persoonsnummer_leidinggevende",
+			"value": "pos_Medewerkernummer_leidinggevende",
 			"validation": {
 				"required": false
 			}
