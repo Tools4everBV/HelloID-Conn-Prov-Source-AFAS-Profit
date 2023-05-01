@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Source-AFAS-Profit-Departments
 #
-# Version: 2.0.0.1
+# Version: 2.0.0.2
 #####################################################
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
@@ -51,6 +51,40 @@ function Resolve-HTTPError {
     }
 }
 
+function Get-ErrorMessage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+            ValueFromPipeline
+        )]
+        [object]$ErrorObject
+    )
+    process {
+        $errorMessage = [PSCustomObject]@{
+            VerboseErrorMessage = $null
+            AuditErrorMessage   = $null
+        }
+
+        if ( $($ErrorObject.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException')) {
+            $httpErrorObject = Resolve-HTTPError -Error $ErrorObject
+
+            $errorMessage.VerboseErrorMessage = $httpErrorObject.ErrorMessage
+
+            $errorMessage.AuditErrorMessage = $httpErrorObject.ErrorMessage
+        }
+
+        # If error message empty, fall back on $ex.Exception.Message
+        if ([String]::IsNullOrEmpty($errorMessage.VerboseErrorMessage)) {
+            $errorMessage.VerboseErrorMessage = $ErrorObject.Exception.Message
+        }
+        if ([String]::IsNullOrEmpty($errorMessage.AuditErrorMessage)) {
+            $errorMessage.AuditErrorMessage = $ErrorObject.Exception.Message
+        }
+
+        Write-Output $errorMessage
+    }
+}
+
 function Get-AFASConnectorData {
     param(
         [parameter(Mandatory = $true)]$Token,
@@ -61,7 +95,7 @@ function Get-AFASConnectorData {
     )
 
     try {
-        Write-Verbose "Starting downloading objects through get-connector '$connector'"
+        Write-Verbose "Starting downloading objects through get-connector [$connector]"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -85,31 +119,17 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-        Write-Verbose "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+        Write-Verbose "Downloaded [$($data.Value.count)] records through get-connector [$connector]"
     }
     catch {
         $data.Value = $null
 
         $ex = $PSItem
-        if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-            $errorObject = Resolve-HTTPError -Error $ex
+        $errorMessage = Get-ErrorMessage -ErrorObject $ex
     
-            $verboseErrorMessage = $errorObject.ErrorMessage
-    
-            $auditErrorMessage = $errorObject.ErrorMessage
-        }
-    
-        # If error message empty, fall back on $ex.Exception.Message
-        if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-            $verboseErrorMessage = $ex.Exception.Message
-        }
-        if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-            $auditErrorMessage = $ex.Exception.Message
-        }
+        Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-
-        throw "Error querying data from '$uri'. Error Message: $auditErrorMessage"
+        throw "Error querying data from [$uri]. Error Message: $($errorMessage.AuditErrorMessage)"
     }
 }
 #endregion functions
@@ -123,28 +143,15 @@ try {
     
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
-    Write-Information "Succesfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
+    Write-Information "Successfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        $auditErrorMessage = $errorObject.ErrorMessage
-    }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-    throw "Could not query OrganizationalUnits. Error: $auditErrorMessage"
+    throw "Could not query OrganizationalUnits. Error Message: $($errorMessage.AuditErrorMessage)"
 }
 
 try {
@@ -154,6 +161,9 @@ try {
     $exportedDepartments = 0
 
     $organizationalUnits | ForEach-Object {
+        # Create department object to log on which department the error occurs
+        $departmentInProcess = $_
+
         # Sanitize and export the json
         $organizationalUnit = $_ | ConvertTo-Json -Depth 10
 
@@ -162,27 +172,17 @@ try {
         # Updated counter to keep track of actual exported department objects
         $exportedDepartments++
     }
-    Write-Information "Succesfully enhanced and exported department objects to HelloID. Result count: $($exportedDepartments)"
+    Write-Information "Successfully enhanced and exported department objects to HelloID. Result count: $($exportedDepartments)"
     Write-Information "Department import completed"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
-
-        $auditErrorMessage = $errorObject.ErrorMessage
+    # If debug logging is toggled, log on which department and line the error occurs
+    if ($c.isDebug -eq $true) {
+        Write-Warning "Error occurred for department [$($departmentInProcess.ExternalId)]. Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
     }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"   
-    throw "Could not enhance and export department objects to HelloID. Error: $auditErrorMessage"
+     
+    throw "Could not enhance and export department objects to HelloID. Error Message: $($errorMessage.AuditErrorMessage)"
 }

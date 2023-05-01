@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Source-AFAS-Profit-Persons
 #
-# Version: 2.0.0.1
+# Version: 2.0.0.2
 #####################################################
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
@@ -52,6 +52,40 @@ function Resolve-HTTPError {
     }
 }
 
+function Get-ErrorMessage {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory,
+            ValueFromPipeline
+        )]
+        [object]$ErrorObject
+    )
+    process {
+        $errorMessage = [PSCustomObject]@{
+            VerboseErrorMessage = $null
+            AuditErrorMessage   = $null
+        }
+
+        if ( $($ErrorObject.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ErrorObject.Exception.GetType().FullName -eq 'System.Net.WebException')) {
+            $httpErrorObject = Resolve-HTTPError -Error $ErrorObject
+
+            $errorMessage.VerboseErrorMessage = $httpErrorObject.ErrorMessage
+
+            $errorMessage.AuditErrorMessage = $httpErrorObject.ErrorMessage
+        }
+
+        # If error message empty, fall back on $ex.Exception.Message
+        if ([String]::IsNullOrEmpty($errorMessage.VerboseErrorMessage)) {
+            $errorMessage.VerboseErrorMessage = $ErrorObject.Exception.Message
+        }
+        if ([String]::IsNullOrEmpty($errorMessage.AuditErrorMessage)) {
+            $errorMessage.AuditErrorMessage = $ErrorObject.Exception.Message
+        }
+
+        Write-Output $errorMessage
+    }
+}
+
 function Get-AFASConnectorData {
     param(
         [parameter(Mandatory = $true)]$Token,
@@ -62,7 +96,7 @@ function Get-AFASConnectorData {
     )
 
     try {
-        Write-Verbose "Starting downloading objects through get-connector '$connector'"
+        Write-Verbose "Starting downloading objects through get-connector [$connector]"
         $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
         $authValue = "AfasToken $encodedToken"
         $Headers = @{ Authorization = $authValue }
@@ -86,31 +120,17 @@ function Get-AFASConnectorData {
 
             foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
         }
-        Write-Verbose "Downloaded '$($data.Value.count)' records through get-connector '$connector'"
+        Write-Verbose "Downloaded [$($data.Value.count)] records through get-connector [$connector]"
     }
     catch {
         $data.Value = $null
 
         $ex = $PSItem
-        if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-            $errorObject = Resolve-HTTPError -Error $ex
+        $errorMessage = Get-ErrorMessage -ErrorObject $ex
     
-            $verboseErrorMessage = $errorObject.ErrorMessage
-    
-            $auditErrorMessage = $errorObject.ErrorMessage
-        }
-    
-        # If error message empty, fall back on $ex.Exception.Message
-        if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-            $verboseErrorMessage = $ex.Exception.Message
-        }
-        if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-            $auditErrorMessage = $ex.Exception.Message
-        }
+        Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-
-        throw "Error querying data from '$uri'. Error Message: $auditErrorMessage"
+        throw "Error querying data from [$uri]. Error Message: $($errorMessage.AuditErrorMessage)"
     }
 }
 #endregion functions
@@ -125,28 +145,15 @@ try {
     # Sort on Medewerker (to make sure the order is always the same)
     $persons = $persons | Sort-Object -Property Medewerker
 
-    Write-Information "Succesfully queried Persons. Result count: $($persons.count)"
+    Write-Information "Successfully queried Persons. Result count: $($persons.count)"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        $auditErrorMessage = $errorObject.ErrorMessage
-    }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-    throw "Could not query Persons. Error: $auditErrorMessage"
+    throw "Could not query Persons. Error Message: $($errorMessage.AuditErrorMessage)"
 }
 
 # Query OrganizationalUnits
@@ -162,28 +169,15 @@ try {
     # Group on ExternalId (to match to employments and positions)
     $organizationalUnitsGrouped = $organizationalUnits | Group-Object ExternalId -AsString -AsHashTable
 
-    Write-Information "Succesfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
+    Write-Information "Successfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        $auditErrorMessage = $errorObject.ErrorMessage
-    }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-    throw "Could not query OrganizationalUnits. Error: $auditErrorMessage"
+    throw "Could not query OrganizationalUnits. Error Message: $($errorMessage.AuditErrorMessage)"
 }
 
 # Query Employments
@@ -220,28 +214,15 @@ try {
     # Group on Medewerker (to match to medewerker)
     $employmentsGrouped = $employments | Group-Object Medewerker -AsHashTable
 
-    Write-Information "Succesfully queried Employments. Result count: $($employments.count)"
+    Write-Information "Successfully queried Employments. Result count: $($employments.count)"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-        $auditErrorMessage = $errorObject.ErrorMessage
-    }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-    throw "Could not query Employments. Error: $auditErrorMessage"
+    throw "Could not query Employments. Error Message: $($errorMessage.AuditErrorMessage)"
 }
 
 # Query Positions
@@ -279,28 +260,15 @@ if ($positionsAction -ne "onlyEmployments") {
         # Group on EmploymentExternalID (to match to employment)
         $positionsGrouped = $positions | Group-Object EmploymentExternalID -AsHashTable
 
-        Write-Information "Succesfully queried Positions. Result count: $($positions.count)"
+        Write-Information "Successfully queried Positions. Result count: $($positions.count)"
     }
     catch {
         $ex = $PSItem
-        if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-            $errorObject = Resolve-HTTPError -Error $ex
+        $errorMessage = Get-ErrorMessage -ErrorObject $ex
     
-            $verboseErrorMessage = $errorObject.ErrorMessage
+        Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
     
-            $auditErrorMessage = $errorObject.ErrorMessage
-        }
-    
-        # If error message empty, fall back on $ex.Exception.Message
-        if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-            $verboseErrorMessage = $ex.Exception.Message
-        }
-        if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-            $auditErrorMessage = $ex.Exception.Message
-        }
-    
-        Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-        throw "Could not query Positions. Error: $auditErrorMessage"
+        throw "Could not query Positions. Error Message: $($errorMessage.AuditErrorMessage)"
     }
 }
 
@@ -311,28 +279,15 @@ if ($positionsAction -ne "onlyEmployments") {
 #     $groups = [System.Collections.ArrayList]::new()
 #     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" -OrderByFieldIds "GroupId" ([ref]$groups)
 
-#     Write-Information "Succesfully queried Groups. Result count: $($groups.count)"
+#     Write-Information "Successfully queried Groups. Result count: $($groups.count)"
 # }
 # catch {
 #     $ex = $PSItem
-#     if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-#         $errorObject = Resolve-HTTPError -Error $ex
+#     $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-#         $verboseErrorMessage = $errorObject.ErrorMessage
+#     Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-#         $auditErrorMessage = $errorObject.ErrorMessage
-#     }
-
-#     # If error message empty, fall back on $ex.Exception.Message
-#     if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-#         $verboseErrorMessage = $ex.Exception.Message
-#     }
-#     if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-#         $auditErrorMessage = $ex.Exception.Message
-#     }
-
-#     Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-#     throw "Could not query Groups. Error: $auditErrorMessage"
+#     throw "Could not query Groups. Error Message: $($errorMessage.AuditErrorMessage)"
 # }
 
 # try{
@@ -344,28 +299,15 @@ if ($positionsAction -ne "onlyEmployments") {
 #     # Group on UserId (to match to user)
 #     $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
 
-#     Write-Information "Succesfully queried UserGroups. Result count: $($userGroups.count)"
+#     Write-Information "Successfully queried UserGroups. Result count: $($userGroups.count)"
 # }
 # catch {
 #     $ex = $PSItem
-#     if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-#         $errorObject = Resolve-HTTPError -Error $ex
+#     $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-#         $verboseErrorMessage = $errorObject.ErrorMessage
+#     Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-#         $auditErrorMessage = $errorObject.ErrorMessage
-#     }
-
-#     # If error message empty, fall back on $ex.Exception.Message
-#     if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-#         $verboseErrorMessage = $ex.Exception.Message
-#     }
-#     if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-#         $auditErrorMessage = $ex.Exception.Message
-#     }
-
-#     Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-#     throw "Could not query UserGroups. Error: $auditErrorMessage"
+#     throw "Could not query UserGroups. Error Message: $($errorMessage.AuditErrorMessage)"
 # }
 
 # try {
@@ -378,32 +320,18 @@ if ($positionsAction -ne "onlyEmployments") {
 #         $persons | Add-Member -MemberType NoteProperty -Name "Role_$($_.GroupId)" -Value $false -Force
 #     }
 
-#     Write-Information "Succesfully enhanced person objects with groups"
+#     Write-Information "Successfully enhanced person objects with groups"
 # }
 # catch {
 #     $ex = $PSItem
-#     if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-#         $errorObject = Resolve-HTTPError -Error $ex
+#     $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-#         $verboseErrorMessage = $errorObject.ErrorMessage
+#     Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
 
-#         $auditErrorMessage = $errorObject.ErrorMessage
-#     }
-
-#     # If error message empty, fall back on $ex.Exception.Message
-#     if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-#         $verboseErrorMessage = $ex.Exception.Message
-#     }
-#     if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-#         $auditErrorMessage = $ex.Exception.Message
-#     }
-
-#     Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-#     throw "Could not enhance person objects with groups. Error: $auditErrorMessage"
+#     throw "Could not enhance person objects with groups. Error Message: $($errorMessage.AuditErrorMessage)"
 # }
 # # End Example (more configuration required in person loop, see below) 1/2
 
-# $persons = $persons | Where-Object {$_.medewerker -eq "19375"}
 try {
     Write-Verbose 'Enhancing and exporting person objects to HelloID'
 
@@ -415,6 +343,9 @@ try {
     $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
     $persons | ForEach-Object {
+        # Create person object to log on which person the error occurs
+        $personInProcess = $_
+
         # Set required fields for HelloID
         $_.ExternalId = $_.Medewerker
 
@@ -438,7 +369,7 @@ try {
                 }
             }
             else {
-                Write-Warning "No employments found for person: $($_.Medewerker)"  
+                Write-Warning "No employments found for person: $($_.ExternalId)"  
             }
         }
         else {
@@ -479,7 +410,7 @@ try {
                 }            
             }
             else {
-                Write-Warning "No employments found for person: $($_.Medewerker)"  
+                Write-Warning "No employments found for person: $($_.ExternalId)"  
             }
         }
 
@@ -488,7 +419,7 @@ try {
             ## This example can be used by the consultant if you want to filter out persons with an empty array as contract
             ## *** Please consult with the Tools4ever consultant before enabling this code. ***
             # if ($contractsList.Count -eq 0) {
-            #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Contracts is an empty array"
+            #     Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Contracts is an empty array"
             #     return
             # }
             # else {
@@ -498,7 +429,7 @@ try {
         ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
         ## *** Please consult with the Tools4ever consultant before enabling this code. ***    
         # else {
-        #     Write-Warning "Excluding person from export: $($_.Medewerker). Reason: Person has no contract data"
+        #     Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Person has no contract data"
         #     return
         # }
 
@@ -513,7 +444,7 @@ try {
         #         Write-Verbose "Person $($_.Gebruiker) has no groupmembership (within specified allowed groups)"
         #     }
         # } else {
-        #     Write-Verbose "User $($_.Medewerker) has no linked user"
+        #     Write-Verbose "User $($_.ExternalId) has no linked user"
         # }
         ## End Group membership example (person part) 2/2
 
@@ -527,27 +458,17 @@ try {
         # Updated counter to keep track of actual exported person objects
         $exportedPersons++
     }
-    Write-Information "Succesfully enhanced and exported person objects to HelloID. Result count: $($exportedPersons)"
+    Write-Information "Successfully enhanced and exported person objects to HelloID. Result count: $($exportedPersons)"
     Write-Information "Person import completed"
 }
 catch {
     $ex = $PSItem
-    if ( $($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
-        $errorObject = Resolve-HTTPError -Error $ex
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
 
-        $verboseErrorMessage = $errorObject.ErrorMessage
-
-        $auditErrorMessage = $errorObject.ErrorMessage
+    # If debug logging is toggled, log on which person and line the error occurs
+    if ($c.isDebug -eq $true) {
+        Write-Warning "Error occurred for person [$($personInProcess.ExternalId)]. Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
     }
-
-    # If error message empty, fall back on $ex.Exception.Message
-    if ([String]::IsNullOrEmpty($verboseErrorMessage)) {
-        $verboseErrorMessage = $ex.Exception.Message
-    }
-    if ([String]::IsNullOrEmpty($auditErrorMessage)) {
-        $auditErrorMessage = $ex.Exception.Message
-    }
-
-    Write-Verbose "Error at Line '$($ex.InvocationInfo.ScriptLineNumber)': $($ex.InvocationInfo.Line). Error: $($verboseErrorMessage)"        
-    throw "Could not enhance and export person objects to HelloID. Error: $auditErrorMessage"
+     
+    throw "Could not enhance and export person objects to HelloID. Error Message: $($errorMessage.AuditErrorMessage)"
 }
