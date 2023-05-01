@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Source-AFAS-Profit-Departments
 #
-# Version: 2.0.0
+# Version: 2.0.0.1
 #####################################################
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
@@ -56,6 +56,7 @@ function Get-AFASConnectorData {
         [parameter(Mandatory = $true)]$Token,
         [parameter(Mandatory = $true)]$BaseUri,
         [parameter(Mandatory = $true)]$Connector,
+        [parameter(Mandatory = $true)]$OrderByFieldIds,
         [parameter(Mandatory = $true)][ref]$data
     )
 
@@ -69,14 +70,14 @@ function Get-AFASConnectorData {
         $take = 1000
         $skip = 0
 
-        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
+        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take&orderbyfieldids=$OrderByFieldIds"
         $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
 
         foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
 
         $skip += $take
         while (@($dataset.rows).count -eq $take) {
-            $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
+            $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take&orderbyfieldids=$OrderByFieldIds"
 
             $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
 
@@ -118,7 +119,7 @@ try {
     Write-Information 'Querying OrganizationalUnits'
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
     
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId

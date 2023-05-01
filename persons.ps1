@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Source-AFAS-Profit-Persons
 #
-# Version: 2.0.0
+# Version: 2.0.0.1
 #####################################################
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
@@ -57,6 +57,7 @@ function Get-AFASConnectorData {
         [parameter(Mandatory = $true)]$Token,
         [parameter(Mandatory = $true)]$BaseUri,
         [parameter(Mandatory = $true)]$Connector,
+        [parameter(Mandatory = $true)]$OrderByFieldIds,
         [parameter(Mandatory = $true)][ref]$data
     )
 
@@ -70,14 +71,14 @@ function Get-AFASConnectorData {
         $take = 1000
         $skip = 0
 
-        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
+        $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take&orderbyfieldids=$OrderByFieldIds"
         $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
 
         foreach ($record in $dataset.rows) { [void]$data.Value.add($record) }
 
         $skip += $take
         while (@($dataset.rows).count -eq $take) {
-            $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take"
+            $uri = $BaseUri + "/connectors/" + $Connector + "?skip=$skip&take=$take&orderbyfieldids=$OrderByFieldIds"
 
             $dataset = Invoke-RestMethod -Method Get -Uri $uri -Headers $Headers -UseBasicParsing
 
@@ -119,7 +120,7 @@ try {
     Write-Verbose "Querying Persons"
 
     $persons = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" ([ref]$persons)
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" -OrderByFieldIds "Medewerker" ([ref]$persons)
 
     # Sort on Medewerker (to make sure the order is always the same)
     $persons = $persons | Sort-Object -Property Medewerker
@@ -153,7 +154,7 @@ try {
     Write-Verbose "Querying OrganizationalUnits"
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" ([ref]$organizationalUnits)
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
     
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
@@ -190,7 +191,7 @@ try {
     Write-Verbose "Querying Employments"
 
     $employments = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" ([ref]$employments)
+    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" -OrderByFieldIds "ExternalID,Medewerker,Begindatum_functie" ([ref]$employments)
 
     # Sort on ExternalID (to make sure the order is always the same)
     $employments = $employments | Sort-Object -Property ExternalID
@@ -249,7 +250,7 @@ if ($positionsAction -ne "onlyEmployments") {
         Write-Verbose "Querying Positions"
 
         $positions = [System.Collections.ArrayList]::new()
-        Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" ([ref]$positions)
+        Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" -OrderByFieldIds "ExternalID,EmploymentExternalID,Medewerker,Begindatum_functie" ([ref]$positions)
 
         # Sort on ExternalID (to make sure the order is always the same)
         $positions = $positions | Sort-Object -Property ExternalID
@@ -308,7 +309,7 @@ if ($positionsAction -ne "onlyEmployments") {
 #     Write-Verbose "Querying Groups"
 
 #     $groups = [System.Collections.ArrayList]::new()
-#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" ([ref]$groups)
+#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" -OrderByFieldIds "GroupId" ([ref]$groups)
 
 #     Write-Information "Succesfully queried Groups. Result count: $($groups.count)"
 # }
@@ -338,7 +339,7 @@ if ($positionsAction -ne "onlyEmployments") {
 #     Write-Verbose "Querying UserGroups"
 
 #     $userGroups = [System.Collections.ArrayList]::new()
-#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" ([ref]$userGroups)
+#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" -OrderByFieldIds "UserId" ([ref]$userGroups)
 
 #     # Group on UserId (to match to user)
 #     $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable
