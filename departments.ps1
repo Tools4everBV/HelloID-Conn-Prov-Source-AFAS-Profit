@@ -164,10 +164,18 @@ try {
         # Create department object to log on which department the error occurs
         $departmentInProcess = $_
 
-        # Sanitize and export the json
-        $organizationalUnit = $_ | ConvertTo-Json -Depth 10
+        # Create department object to ensure only allowed properties are send to HelloID
+        $departmentObject = [PSCustomObject]@{
+            ExternalId        = $_.ExternalId
+            DisplayName       = $_.DisplayName
+            ManagerExternalId = $_.ManagerExternalId
+            ParentExternalId  = $_.ParentExternalId
+        }
 
-        Write-Output $organizationalUnit
+        # Sanitize and export the json
+        $departmentObject = $departmentObject | ConvertTo-Json -Depth 10
+
+        Write-Output $departmentObject
 
         # Updated counter to keep track of actual exported department objects
         $exportedDepartments++
