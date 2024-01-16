@@ -23,7 +23,7 @@
   {
     "key": "positionsAction",
     "type": "radio",
-    "defaultValue": "onlyEmployments",
+    "defaultValue": "usePositions",
     "templateOptions": {
       "label": "What to do with positions?",
       "description": "Do not change this in a production environment, as this can lead to the revocation of authorizations.",
