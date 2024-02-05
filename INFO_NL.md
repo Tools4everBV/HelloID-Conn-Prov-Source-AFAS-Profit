@@ -1,4 +1,4 @@
-Met de AFAS Profit connector wordt het beheren van toegangsrechten en gebruikersaccounts steeds makkelijker. De AFAS HelloID koppeling maakt het mogelijk om deze processen te automatiseren op basis van het HR-systeem. In dit artikel geef ik meer uitleg over wat deze koppeling inhoudt en welke specifieke mogelijkheden het biedt. 
+Met de AFAS Profit connector wordt het beheren van toegangsrechten en gebruikersaccounts steeds makkelijker. De AFAS HelloID koppeling maakt het mogelijk om deze processen te automatiseren op basis van het HR-systeem. In dit artikel leggen we uit wat deze koppeling inhoudt en welke specifieke mogelijkheden het biedt. 
 
 ## Wat is AFAS Profit 
 AFAS is een uitgebreide HRM, payroll, en financieel management software oplossing. Het stroomlijnt het beheer van werknemersinformatie, contractdetails en organisatorische gegevens om de efficiëntie en effectiviteit binnen een organisatie te verbeteren.
