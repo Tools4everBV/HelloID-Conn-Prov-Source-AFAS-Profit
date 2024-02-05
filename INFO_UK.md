@@ -43,11 +43,11 @@ The Update Connector enables HelloID to **add, modify, or delete data in the AFA
 
 ## Linking AFAS with Active Directory, Azure, TOPdesk, and More
 HelloID makes it easy to link AFAS with common target systems. This ensures improved automation and collaboration between different applications. Some relevant examples of integrations include:
-• **AFAS – Active Directory integration**
+* **AFAS – Active Directory integration**
 Experience seamless synchronisation between AFAS and Active Directory (AD) with HelloID, keeping accounts and access rights up to date at all times.
-• **AFAS – Azure AD integration**
+* **AFAS – Azure AD integration**
 Benefit from automated synchronisation between AFAS and Azure AD with HelloID. Based on AFAS, HelloID ensures automatic account creation, rights management, and license management (e.g., Office licenses).
-• **AFAS – TOPdesk integration**
+* **AFAS – TOPdesk integration**
 Increase efficiency between HR and IT by linking AFAS with TOPdesk. HelloID can, for example, automatically create tickets during onboarding, leading to a streamlined process.
 
 In addition, HelloID supports more than 200 connectors, offering an extensive range of integration possibilities between AFAS and other systems.
