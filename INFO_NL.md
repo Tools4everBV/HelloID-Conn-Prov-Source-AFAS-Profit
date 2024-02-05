@@ -7,9 +7,9 @@ AFAS is een uitgebreide HRM, payroll, en financieel management software oplossin
 
 Het beheer van gebruikersaccounts en toegangsrechten kan tijdrovend en foutgevoelig zijn, vooral als het om handmatige processen gaat. Het is essentieel om ervoor te zorgen dat nieuwe medewerkers vanaf de eerste dag de juiste autorisatie hebben, zodat ze gelijk aan de slag kunnen. Daarbij is het van belang dat wijzigingen in rollen, locaties of arbeidsstatus nauwkeurig worden weergegeven in het systeem. De AFAS HelloID koppeling maakt het mogelijk om deze processen te automatiseren op basis van het HR-systeem. Daarnaast biedt De AFAS connector een koppeling met veelvoorkomende doelsystemen zoals: 
 
-* Active directory 
+* Active Directory 
 * Azure AD 
-* Topdesk 
+* TOPdesk 
 
 Verdere details over de koppeling met deze doelsystemen zijn te vinden verderop in het artikel.
 
@@ -43,13 +43,13 @@ De Get Connector haalt gegevens uit AFAS op en deelt deze met HelloID. Deze conn
 
 De Update Connector stelt HelloID in staat om **data toe te voegen, wijzigen of verwijderen in de AFAS-database. HelloID kan bijvoorbeeld e-mailadressen van medewerkers bijwerken en gebruikersaccounts beheren binnen AFAS Insite.
 
-## Koppeling AFAS met Active directory, Azure, Topdesk en meer
+## Koppeling AFAS met Active directory, Azure, TOPdesk en meer
 HelloID maakt het eenvoudig om AFAS te koppelen met veelvoorkomende doelsystemen. Dit zorgt voor een verbeterde automatisering en samenwerking tussen verschillende applicaties. Enkele relevante voorbeelden van integraties zijn:
-•	**AFAS – Active Directory koppeling**
+*	**AFAS – Active Directory koppeling**
 Ervaar met HelloID een naadloze synchronisatie tussen AFAS en Active Directory (AD), waardoor accounts en toegangsrechten te allen tijde up-to-date blijven.
-•	**AFAS – Azure AD koppeling**
+*	**AFAS – Azure AD koppeling**
 Profiteer dankzij HelloID van geautomatiseerde synchronisatie tussen AFAS en Azure AD. HelloID zorgt op basis van AFAS voor automatische accountaanmaak, rechtenbeheer en licentiebeheer (bijvoorbeeld Office-licenties).
-•	**AFAS – TOPdesk koppeling**
+*	**AFAS – TOPdesk koppeling**
  Verhoog de efficiëntie tussen HR en IT door AFAS met TOPdesk te koppelen. HelloID kan bijvoorbeeld automatisch tickets aanmaken bij onboarding, wat leidt tot een gestroomlijnd proces.
 
 Daarnaast ondersteunt HelloID meer dan 200 connectoren. Hiermee biedt HelloID een uitgebreid scala aan integratiemogelijkheden tussen AFAS en andere systemen.
