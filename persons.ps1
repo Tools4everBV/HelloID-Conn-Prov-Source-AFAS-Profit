@@ -11,6 +11,8 @@ $VerbosePreference = "SilentlyContinue"
 $InformationPreference = "Continue"
 $WarningPreference = "Continue"
 
+# Test comment
+
 $c = $configuration | ConvertFrom-Json
 
 $baseUri = $c.BaseUrl
