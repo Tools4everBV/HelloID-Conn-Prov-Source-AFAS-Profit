@@ -50,4 +50,4 @@ Benefit from automated synchronisation between AFAS and Azure AD with HelloID. B
 * **AFAS – TOPdesk integration**
 Increase efficiency between HR and IT by linking AFAS with TOPdesk. HelloID can, for example, automatically create tickets during onboarding, leading to a streamlined process.
 
-In addition, HelloID supports more than 200 connectors, offering an extensive range of integration possibilities between AFAS and other systems.
+In addition, HelloID supports more than 200 connectors, offering an extensive range of integration possibilities between AFAS and other systems. 
