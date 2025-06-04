@@ -173,6 +173,9 @@ try {
     # Group on ExternalId (to match to employments and positions)
     $organizationalUnitsGrouped = $organizationalUnits | Group-Object ExternalId -AsString -AsHashTable
 
+    # Group on ManagerExternalId (to match to person as manager to departments and calculate the field 'managerOf')
+    $organizationalUnitsGroupedByManager = $organizationalUnits | Group-Object ManagerExternalId -AsString -AsHashTable
+
     Write-Information "Successfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
 }
 catch {
@@ -346,6 +349,9 @@ try {
     $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
     $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
+    # Add additional properties to person
+    $persons | Add-Member -MemberType NoteProperty -Name "ManagerOf" -Value $null -Force
+
     $persons | ForEach-Object {
         # Create person object to log on which person the error occurs
         $personInProcess = $_
@@ -460,6 +466,13 @@ try {
         #     $_ | Add-Member -MemberType NoteProperty -Name "isManager" -Value $false -Force
         # }
         # #endregion Example to add boolean value if person is manager 2/2
+
+        # Calculate and set the field 'managerOf'
+        $organizationalUnitsPersonIsManagerOf = $null
+        $organizationalUnitsPersonIsManagerOf = $organizationalUnitsGroupedByManager["$($_.ExternalId)"]
+        if ($null -ne $organizationalUnitsPersonIsManagerOf ) {
+            $_.ManagerOf = '"{0}"' -f ($organizationalUnitsPersonIsManagerOf.ExternalId -Join '","')
+        }
 
         # Sanitize and export the json
         $person = $_ | ConvertTo-Json -Depth 10
