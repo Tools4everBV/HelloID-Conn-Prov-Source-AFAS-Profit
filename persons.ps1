@@ -162,10 +162,6 @@ try {
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
-    
-    # #region Example to add boolean value if person is manager (more configuration required in person loop, see below) 1/2
-    # $managersList = ($organizationalUnits | Group-Object ManagerExternalId).name | Sort-Object -Unique
-    # #endregion Example to add boolean value if person is manager (more configuration required in person loop, see below) 1/2
 
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
@@ -457,15 +453,6 @@ try {
         #     Write-Verbose "User $($_.ExternalId) has no linked user"
         # }
         ## End Group membership example (person part) 2/2
-
-        # #region Example to add boolean value if person is manager 2/2
-        # if ($managersList -contains $_.ExternalId ) {
-        #     $_ | Add-Member -MemberType NoteProperty -Name "isManager" -Value $true -Force
-        # }
-        # else {
-        #     $_ | Add-Member -MemberType NoteProperty -Name "isManager" -Value $false -Force
-        # }
-        # #endregion Example to add boolean value if person is manager 2/2
 
         # Calculate and set the field 'managerOf'
         $organizationalUnitsPersonIsManagerOf = $null
