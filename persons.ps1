@@ -162,16 +162,15 @@ try {
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
-    
-    # #region Example to add boolean value if person is manager (more configuration required in person loop, see below) 1/2
-    # $managersList = ($organizationalUnits | Group-Object ManagerExternalId).name | Sort-Object -Unique
-    # #endregion Example to add boolean value if person is manager (more configuration required in person loop, see below) 1/2
 
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
 
     # Group on ExternalId (to match to employments and positions)
     $organizationalUnitsGrouped = $organizationalUnits | Group-Object ExternalId -AsString -AsHashTable
+
+    # Group on ManagerExternalId (to match to person as manager to departments and calculate the field 'managerOf')
+    $organizationalUnitsGroupedByManager = $organizationalUnits | Group-Object ManagerExternalId -AsString -AsHashTable
 
     Write-Information "Successfully queried OrganizationalUnits. Result count: $($organizationalUnits.count)"
 }
@@ -346,6 +345,9 @@ try {
     $persons | Add-Member -MemberType NoteProperty -Name "Contracts" -Value $null -Force
     $persons | Add-Member -MemberType NoteProperty -Name "ExternalId" -Value $null -Force
 
+    # Add additional properties to person
+    $persons | Add-Member -MemberType NoteProperty -Name "ManagerOf" -Value $null -Force
+
     $persons | ForEach-Object {
         # Create person object to log on which person the error occurs
         $personInProcess = $_
@@ -452,14 +454,12 @@ try {
         # }
         ## End Group membership example (person part) 2/2
 
-        # #region Example to add boolean value if person is manager 2/2
-        # if ($managersList -contains $_.ExternalId ) {
-        #     $_ | Add-Member -MemberType NoteProperty -Name "isManager" -Value $true -Force
-        # }
-        # else {
-        #     $_ | Add-Member -MemberType NoteProperty -Name "isManager" -Value $false -Force
-        # }
-        # #endregion Example to add boolean value if person is manager 2/2
+        # Calculate and set the field 'managerOf'
+        $organizationalUnitsPersonIsManagerOf = $null
+        $organizationalUnitsPersonIsManagerOf = $organizationalUnitsGroupedByManager["$($_.ExternalId)"]
+        if ($null -ne $organizationalUnitsPersonIsManagerOf ) {
+            $_.ManagerOf = '"{0}"' -f ($organizationalUnitsPersonIsManagerOf.ExternalId -Join '","')
+        }
 
         # Sanitize and export the json
         $person = $_ | ConvertTo-Json -Depth 10
