@@ -14,13 +14,13 @@ Het beheer van gebruikersaccounts en toegangsrechten kan tijdrovend en foutgevoe
 Verdere details over de koppeling met deze doelsystemen zijn te vinden verderop in het artikel.
 
 ## De HelloID AFAS koppeling helpt je met
-👉	**Versnelde accountaanmaak:** Geautomatiseerde processen versnellen de tijd die nodig is om nieuwe accounts aan te maken. Nieuwe medewerkers kunnen vanaf dag één productief zijn, met minimale handmatige tussenkomst.
+**Versnelde accountaanmaak:** Geautomatiseerde processen versnellen de tijd die nodig is om nieuwe accounts aan te maken. Nieuwe medewerkers kunnen vanaf dag één productief zijn, met minimale handmatige tussenkomst.
 
-👉 **Foutloos accountbeheer:** Geautomatiseerde processen verminderen de kans op fouten bij het beheer van accounts. Medewerkers beschikken altijd precies over de accounts en rechten waar zij volgens de autorisatiematrix recht op hebben.
+**Foutloos accountbeheer:** Geautomatiseerde processen verminderen de kans op fouten bij het beheer van accounts. Medewerkers beschikken altijd precies over de accounts en rechten waar zij volgens de autorisatiematrix recht op hebben.
 
-👉	**Bi-directionele synchronisatie:** Wijzigingen in AFAS Profit worden automatisch gedetecteerd en verwerkt in alle aan HelloID gekoppelde systemen en applicaties. Door HelloID gegenereerde gebruikersnamen en emailadressen worden ook automatisch teruggeschreven naar AFAS.
+**Bi-directionele synchronisatie:** Wijzigingen in AFAS Profit worden automatisch gedetecteerd en verwerkt in alle aan HelloID gekoppelde systemen en applicaties. Door HelloID gegenereerde gebruikersnamen en emailadressen worden ook automatisch teruggeschreven naar AFAS.
 
-👉	**Verbeterde serviceniveaus en beveiliging:** Integratie van AFAS met HelloID helpt organisaties te voldoen aan service level agreements (SLA) en IT-audits te doorstaan.
+**Verbeterde serviceniveaus en beveiliging:** Integratie van AFAS met HelloID helpt organisaties te voldoen aan service level agreements (SLA) en IT-audits te doorstaan.
 
 ## Hoe HelloID integreert met AFAS 
 Als Certified Partner van AFAS beschikt Tools4ever over een gecertificeerde koppeling met AFAS Profit en AFAS Online. AFAS kan met HelloID worden geïntegreerd als source én target connector. Dankzij de koppeling detecteert HelloID iedere wijziging in AFAS en beheert automatisch gebruikersaccounts in het applicatielandschap volgens de gedefinieerde regels en procedures.
