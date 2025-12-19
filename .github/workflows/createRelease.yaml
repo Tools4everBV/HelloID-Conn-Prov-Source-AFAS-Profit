@@ -1,0 +1,82 @@
+##############################
+# Workflow: Create Release
+# Version:  0.0.2
+##############################
+
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., v1.0.0). Leave blank to use the latest version from CHANGELOG.md.'
+        required: false
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Determine Version
+      id: determine_version
+      run: |
+        if [ -n "${{ github.event.inputs.version }}" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          if [ -f CHANGELOG.md ]; then
+            VERSION=$(grep -oP '^## \[\K[^]]+' CHANGELOG.md | head -n 1)
+            if [ -z "$VERSION" ]; then
+              echo "No versions found in CHANGELOG.md."
+              exit 1
+            fi
+          else
+            echo "CHANGELOG.md not found. Cannot determine version."
+            exit 1
+          fi
+        fi
+        [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "VERSION_NO_V=${VERSION#v}" >> $GITHUB_ENV
+
+    - name: Extract Release Notes from CHANGELOG.md
+      id: extract_notes
+      if: ${{ github.event.inputs.version == '' }}
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          awk '/## \['"${VERSION_NO_V}"'\]/{flag=1; next} /## \[/{flag=0} flag' CHANGELOG.md > release_notes.txt
+          if [ ! -s release_notes.txt ]; then
+            echo "No release notes found for version ${VERSION_NO_V} in CHANGELOG.md."
+            exit 1
+          fi
+        else
+          echo "CHANGELOG.md not found in the repository."
+          exit 1
+        fi
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+        cat release_notes.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Default Release Notes
+      if: ${{ github.event.inputs.version != '' }}
+      run: |
+        echo "RELEASE_NOTES=Release notes not provided for version ${VERSION}." >> $GITHUB_ENV
+
+    - name: Debug Release Notes
+      run: |
+        echo "Extracted Release Notes:"
+        echo "${RELEASE_NOTES}"
+
+    - name: Create GitHub Release
+      run: |
+        gh release create "${VERSION}" --title "${VERSION}" --notes-file release_notes.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
