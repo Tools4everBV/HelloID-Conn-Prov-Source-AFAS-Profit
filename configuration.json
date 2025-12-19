@@ -40,6 +40,15 @@
     }
   },
   {
+    "key": "excludePersonsWithoutContractsInHelloID",
+    "type": "checkbox",
+    "defaultValue": true,
+    "templateOptions": {
+      "label": "Exclude persons without contracts in HelloID",
+      "required": false
+    }
+  },
+  {
     "key": "isDebug",
     "type": "checkbox",
     "defaultValue": false,

@@ -16,6 +16,7 @@ $c = $configuration | ConvertFrom-Json
 $baseUri = $c.BaseUrl
 $token = $c.Token
 $positionsAction = $c.positionsAction
+$excludePersonsWithoutContractsInHelloID = $c.excludePersonsWithoutContractsInHelloID
 
 # Set debug logging
 switch ($($c.isDebug)) {
@@ -422,22 +423,18 @@ try {
 
         # Add Contracts to person
         if ($null -ne $contractsList) {
-            ## This example can be used by the consultant if you want to filter out persons with an empty array as contract
-            ## *** Please consult with the Tools4ever consultant before enabling this code. ***
-            # if ($contractsList.Count -eq 0) {
-            #     Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Contracts is an empty array"
-            #     return
-            # }
-            # else {
-            $_.Contracts = $contractsList
-            # }
+            if ($contractsList.Count -eq 0 -and $true -eq $excludePersonsWithoutContractsInHelloID) {
+                # Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Contracts is an empty array"
+                return
+            }
+            else {
+                $_.Contracts = $contractsList
+            }
         }
-        ## This example can be used by the consultant if the date filters on the person/employment/positions do not line up and persons without a contract are added to HelloID
-        ## *** Please consult with the Tools4ever consultant before enabling this code. ***    
-        # else {
-        #     Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Person has no contract data"
-        #     return
-        # }
+        elseif ($true -eq $excludePersonsWithoutContractsInHelloID) {
+            # Write-Warning "Excluding person from export: $($_.ExternalId). Reason: Person has no contract data"
+            return
+        }
 
         ## Group membership example (person part) 2/2
         # if (-Not[String]::IsNullOrEmpty($_.Gebruiker)){

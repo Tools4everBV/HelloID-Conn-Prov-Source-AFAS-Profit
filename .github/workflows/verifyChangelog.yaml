@@ -1,0 +1,35 @@
+####################################
+# Workflow: Verify CHANGELOG Updated
+# Version:  0.0.1
+####################################
+
+name: Verify CHANGELOG Updated
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check-changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Ensure CHANGELOG.md is updated
+      run: |
+        # Fetch the base branch to compare against
+        git fetch origin ${{ github.base_ref }} --depth=1
+
+        # Compare changes between the current branch and the base branch
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }})
+
+        # Check if CHANGELOG.md is included in the list of changed files
+        if echo "$CHANGED_FILES" | grep -q 'CHANGELOG.md'; then
+          echo "CHANGELOG.md is updated."
+        else
+          echo "ERROR: Please update the CHANGELOG.md file with your changes." && exit 1
+        fi
