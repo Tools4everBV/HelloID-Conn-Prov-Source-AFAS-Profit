@@ -14,7 +14,8 @@ $WarningPreference = "Continue"
 $c = $configuration | ConvertFrom-Json
 
 $baseUri = $($c.BaseUrl)
-$token = $($c.Token)
+$clientId = $($c.ClientId)
+$clientSecret = $($c.ClientSecret)
 
 # Set debug logging
 switch ($($c.isDebug)) {
@@ -22,7 +23,7 @@ switch ($($c.isDebug)) {
     $false { $VerbosePreference = 'SilentlyContinue' }
 }
 
-Write-Information "Start department import: Base URL: $baseUri, Using positionsAction: $positionsAction, token length: $($token.length)"
+Write-Information "Start department import: Base URL: $baseUri, Using OAuth client credentials"
 
 #region functions
 function Resolve-HTTPError {
@@ -87,7 +88,7 @@ function Get-ErrorMessage {
 
 function Get-AFASConnectorData {
     param(
-        [parameter(Mandatory = $true)]$Token,
+        [parameter(Mandatory = $true)]$Headers,
         [parameter(Mandatory = $true)]$BaseUri,
         [parameter(Mandatory = $true)]$Connector,
         [parameter(Mandatory = $true)]$OrderByFieldIds,
@@ -96,10 +97,6 @@ function Get-AFASConnectorData {
 
     try {
         Write-Verbose "Starting downloading objects through get-connector [$connector]"
-        $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
-        $authValue = "AfasToken $encodedToken"
-        $Headers = @{ Authorization = $authValue }
-        $Headers.Add("IntegrationId", "45963_140664") # Fixed value - Tools4ever Partner Integration ID
 
         $take = 1000
         $skip = 0
@@ -134,12 +131,47 @@ function Get-AFASConnectorData {
 }
 #endregion functions
 
+# Obtain OAuth access token
+try {
+    $tokenUri = "$baseUri/oauth/token"
+    Write-Verbose "Requesting OAuth access token from [$tokenUri]"
+
+    $tokenRequestBody = @{
+        grant_type    = 'client_credentials'
+        client_id     = $clientId
+        client_secret = $clientSecret
+    }
+
+    $tokenResponse = Invoke-RestMethod -Method Post -Uri $tokenUri -Body $tokenRequestBody -ContentType 'application/x-www-form-urlencoded' -UseBasicParsing
+
+    if ([String]::IsNullOrWhiteSpace([String]$tokenResponse.access_token)) {
+        throw "OAuth token endpoint did not return an access_token."
+    }
+
+    if ([String]::IsNullOrWhiteSpace([String]$tokenResponse.token_type) -or ([String]$tokenResponse.token_type).ToLowerInvariant() -ne 'bearer') {
+        throw "OAuth token endpoint returned an unexpected token_type [$($tokenResponse.token_type)]. Expected [Bearer]."
+    }
+
+    $headers = @{ Authorization = "$($tokenResponse.token_type) $($tokenResponse.access_token)" }
+    $headers.Add("IntegrationId", "45963_140664") # Fixed value - Tools4ever Partner Integration ID
+
+    Write-Information "Successfully obtained OAuth access token"
+}
+catch {
+    $ex = $PSItem
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
+
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
+
+    throw "Could not obtain OAuth access token. Error Message: $($errorMessage.AuditErrorMessage)"
+}
+
 # Query OrganizationalUnits
 try {
     Write-Information 'Querying OrganizationalUnits'
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
+    Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
     
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
