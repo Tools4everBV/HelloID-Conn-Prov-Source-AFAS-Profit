@@ -29,6 +29,7 @@
   - [Source](#source)
   - [Remarks](#remarks)
   - [Mappings](#mappings)
+  - [Primary contract calculation](#primary-contract-calculation)
   - [Scope](#scope)
   - [Target](#target)
 - [Getting help](#getting-help)
@@ -94,6 +95,20 @@ The following GetConnectors are required by HelloID when the system is defined a
 ### Mappings
 A basic mapping is provided. Make sure to further customize these accordingly.
 Please choose the default mappingset to use with the configured configuration.
+
+### Primary contract calculation
+For AFAS with `positionsAction = usePositions`, configure the primary contract calculation in HelloID with the following sort order:
+
+| Field                                              | Direction  |
+|----------------------------------------------------|------------|
+| Details.FTE                                        | Descending |
+| Details.HoursPerWeek                               | Descending |
+| Details.Percentage (shown as Percentage in the UI) | Descending |
+| Details.Sequence                                   | Descending |
+| EndDate                                            | Descending |
+| StartDate                                          | Ascending  |
+
+Including `Details.Percentage` is required to match the intended primary contract selection for AFAS positions.
 
 ### Scope
 The data collection retrieved by the set of GetConnector's is sufficient for HelloID to provision persons.
