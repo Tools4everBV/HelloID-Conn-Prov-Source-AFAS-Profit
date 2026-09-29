@@ -11,16 +11,8 @@
   <img src="https://www.tools4ever.nl/wp-content/uploads/2024/08/Logo.png">
 </p>
 
-## Versioning
-| Version | Description                                                        | Date       |
-|---------|--------------------------------------------------------------------|------------|
-| 2.2.1   | Added configurable exclusion of persons without contracts          | 2025/12/19 |
-| 2.0.0   | Release of v2 connector including performance and logging upgrades | 2023/08/21 |
-| 1.0.0   | Initial release                                                    | 2023/06/19 |
-
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
-- [Versioning](#versioning)
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Getting Started](#getting-started)
