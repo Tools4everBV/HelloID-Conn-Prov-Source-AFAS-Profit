@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to [Semantic Versioning](https://semver.org).
 
-## [2.3.0] - 2026-07-17
+## [3.0.0] - 2026-07-17
 
 ### Changed
-- Changed authentication to OAuth
+- Changed authentication to OAuth (breaking: `Token` configuration field replaced by `ClientId` and `ClientSecret`)
 
 ## [2.2.1] - 2025-12-19
 
