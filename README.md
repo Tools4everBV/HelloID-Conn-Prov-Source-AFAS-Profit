@@ -45,7 +45,7 @@ Please see the following pages from the AFAS Knowledge Base for more information
 
 [Manage the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Maint.htm)
 
-[Configure OAuth on the APP connector](https://docs.afas.help/profit/en/authentication#oauth)
+[Configure OAuth on the APP connector](https://help.afas.nl/help/NL/SE/120718.htm#o136210)
 
 ### Connection settings
 

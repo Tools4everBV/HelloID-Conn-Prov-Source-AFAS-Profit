@@ -13,7 +13,7 @@
     "key": "ClientId",
     "type": "input",
     "templateOptions": {
-      "label": "ClientId",
+      "label": "Client ID",
       "placeholder": "Example: 2f8a2f4d-9a5f-41d8-aec8-6ab123456789",
       "description": "The OAuth client id of the AFAS AppConnector.",
       "required": true
@@ -23,7 +23,7 @@
     "key": "ClientSecret",
     "type": "input",
     "templateOptions": {
-      "label": "ClientSecret",
+      "label": "Client Secret",
       "type": "password",
       "placeholder": "Example: 1234567890abcdef1234567890abcdef12345678",
       "description": "The OAuth client secret of the AFAS AppConnector.",
