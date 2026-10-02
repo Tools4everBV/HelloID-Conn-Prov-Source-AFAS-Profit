@@ -14,7 +14,8 @@ $WarningPreference = "Continue"
 $c = $configuration | ConvertFrom-Json
 
 $baseUri = $c.BaseUrl
-$token = $c.Token
+$clientId = $c.ClientId
+$clientSecret = $c.ClientSecret
 $positionsAction = $c.positionsAction
 $excludePersonsWithoutContractsInHelloID = $c.excludePersonsWithoutContractsInHelloID
 
@@ -24,7 +25,7 @@ switch ($($c.isDebug)) {
     $false { $VerbosePreference = 'SilentlyContinue' }
 }
 
-Write-Information "Start person import: Base URL: $baseUri, Using positionsAction: $positionsAction, token length: $($token.length)"
+Write-Information "Start person import: Base URL: $baseUri, Using positionsAction: $positionsAction, Using OAuth client credentials"
 
 #region functions
 function Resolve-HTTPError {
@@ -89,7 +90,7 @@ function Get-ErrorMessage {
 
 function Get-AFASConnectorData {
     param(
-        [parameter(Mandatory = $true)]$Token,
+        [parameter(Mandatory = $true)]$Headers,
         [parameter(Mandatory = $true)]$BaseUri,
         [parameter(Mandatory = $true)]$Connector,
         [parameter(Mandatory = $true)]$OrderByFieldIds,
@@ -98,10 +99,6 @@ function Get-AFASConnectorData {
 
     try {
         Write-Verbose "Starting downloading objects through get-connector [$connector]"
-        $encodedToken = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($Token))
-        $authValue = "AfasToken $encodedToken"
-        $Headers = @{ Authorization = $authValue }
-        $Headers.Add("IntegrationId", "45963_140664") # Fixed value - Tools4ever Partner Integration ID
 
         $take = 1000
         $skip = 0
@@ -136,12 +133,47 @@ function Get-AFASConnectorData {
 }
 #endregion functions
 
+# Obtain OAuth access token
+try {
+    $tokenUri = "$baseUri/oauth/token"
+    Write-Verbose "Requesting OAuth access token from [$tokenUri]"
+
+    $tokenRequestBody = @{
+        grant_type    = 'client_credentials'
+        client_id     = $clientId
+        client_secret = $clientSecret
+    }
+
+    $tokenResponse = Invoke-RestMethod -Method Post -Uri $tokenUri -Body $tokenRequestBody -ContentType 'application/x-www-form-urlencoded' -UseBasicParsing
+
+    if ([String]::IsNullOrWhiteSpace([String]$tokenResponse.access_token)) {
+        throw "OAuth token endpoint did not return an access_token."
+    }
+
+    if ([String]::IsNullOrWhiteSpace([String]$tokenResponse.token_type) -or ([String]$tokenResponse.token_type).ToLowerInvariant() -ne 'bearer') {
+        throw "OAuth token endpoint returned an unexpected token_type [$($tokenResponse.token_type)]. Expected [Bearer]."
+    }
+
+    $headers = @{ Authorization = "$($tokenResponse.token_type) $($tokenResponse.access_token)" }
+    $headers.Add("IntegrationId", "45963_140664") # Fixed value - Tools4ever Partner Integration ID
+
+    Write-Information "Successfully obtained OAuth access token"
+}
+catch {
+    $ex = $PSItem
+    $errorMessage = Get-ErrorMessage -ErrorObject $ex
+
+    Write-Verbose "Error at Line [$($ex.InvocationInfo.ScriptLineNumber)]: $($ex.InvocationInfo.Line). Error: $($errorMessage.VerboseErrorMessage)"
+
+    throw "Could not obtain OAuth access token. Error Message: $($errorMessage.AuditErrorMessage)"
+}
+
 # Query Persons
 try {
     Write-Verbose "Querying Persons"
 
     $persons = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" -OrderByFieldIds "Medewerker" ([ref]$persons)
+    Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_Users_v2" -OrderByFieldIds "Medewerker" ([ref]$persons)
 
     # Sort on Medewerker (to make sure the order is always the same)
     $persons = $persons | Sort-Object -Property Medewerker
@@ -162,7 +194,7 @@ try {
     Write-Verbose "Querying OrganizationalUnits"
 
     $organizationalUnits = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
+    Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_OrganizationalUnits_v2" -OrderByFieldIds "ExternalId" ([ref]$organizationalUnits)
 
     # Sort on ExternalId (to make sure the order is always the same)
     $organizationalUnits = $organizationalUnits | Sort-Object -Property ExternalId
@@ -189,7 +221,7 @@ try {
     Write-Verbose "Querying Employments"
 
     $employments = [System.Collections.ArrayList]::new()
-    Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" -OrderByFieldIds "ExternalID,Medewerker,Begindatum_functie" ([ref]$employments)
+    Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_Employments_v2" -OrderByFieldIds "ExternalID,Medewerker,Begindatum_functie" ([ref]$employments)
 
     # Sort on ExternalID (to make sure the order is always the same)
     $employments = $employments | Sort-Object -Property ExternalID
@@ -235,7 +267,7 @@ if ($positionsAction -ne "onlyEmployments") {
         Write-Verbose "Querying Positions"
 
         $positions = [System.Collections.ArrayList]::new()
-        Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" -OrderByFieldIds "ExternalID,EmploymentExternalID,Medewerker,Begindatum_functie" ([ref]$positions)
+        Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_Positions_v2" -OrderByFieldIds "ExternalID,EmploymentExternalID,Medewerker,Begindatum_functie" ([ref]$positions)
 
         # Sort on ExternalID (to make sure the order is always the same)
         $positions = $positions | Sort-Object -Property ExternalID
@@ -281,7 +313,7 @@ if ($positionsAction -ne "onlyEmployments") {
 #     Write-Verbose "Querying Groups"
 
 #     $groups = [System.Collections.ArrayList]::new()
-#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" -OrderByFieldIds "GroupId" ([ref]$groups)
+#     Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_Groups_v2" -OrderByFieldIds "GroupId" ([ref]$groups)
 
 #     Write-Information "Successfully queried Groups. Result count: $($groups.count)"
 # }
@@ -298,7 +330,7 @@ if ($positionsAction -ne "onlyEmployments") {
 #     Write-Verbose "Querying UserGroups"
 
 #     $userGroups = [System.Collections.ArrayList]::new()
-#     Get-AFASConnectorData -Token $token -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" -OrderByFieldIds "UserId" ([ref]$userGroups)
+#     Get-AFASConnectorData -Headers $headers -BaseUri $baseUri -Connector "T4E_HelloID_UserGroups_v2" -OrderByFieldIds "UserId" ([ref]$userGroups)
 
 #     # Group on UserId (to match to user)
 #     $userGroupsGrouped = $userGroups | Group-Object UserId -AsHashTable

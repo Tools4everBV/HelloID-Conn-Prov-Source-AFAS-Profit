@@ -1,25 +1,18 @@
-| :warning: Warning |
-|:---------------------------|
+| :warning: Warning                                                                                                                                                                                                                    |
+|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | The latest version of this connector uses employeeId (Medewerkernummer) as the ExternalId instead of personId (Persoonsnummer). **This can be a breaking change when updating from a previous version. Make sure to validate this!** |
 
 
-| :information_source: Information |
-|:---------------------------|
-| This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements.       |
+| :information_source: Information                                                                                                                                                                                                                                                                                                                                                       |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| This repository contains the connector and configuration code only. The implementer is responsible to acquire the connection details such as username, password, certificate, etc. You might even need to sign a contract or agreement with the supplier before implementing this connector. Please contact the client's application manager to coordinate the connector requirements. |
 
 <p align="center">
   <img src="https://www.tools4ever.nl/wp-content/uploads/2024/08/Logo.png">
 </p>
 
-## Versioning
-| Version | Description | Date |
-| - | - | - |
-| 2.0.0   | Release of v2 connector including performance and logging upgrades | 2022/08/30  |
-| 1.0.0   | Initial release | 2020/07/24  |
-
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
-- [Versioning](#versioning)
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Getting Started](#getting-started)
@@ -28,6 +21,7 @@
   - [Source](#source)
   - [Remarks](#remarks)
   - [Mappings](#mappings)
+  - [Primary contract calculation](#primary-contract-calculation)
   - [Scope](#scope)
   - [Target](#target)
 - [Getting help](#getting-help)
@@ -44,31 +38,35 @@ For this connector we have created a default set, which can be imported directly
 
 By using this connector you will have the ability to retrieve employee and contract data from the AFAS Profit HR system.
 
-Connecting to Profit is done using the app connector system. 
+Connecting to Profit is done using the app connector system with OAuth client credentials.
 Please see the following pages from the AFAS Knowledge Base for more information.
 
 [Create the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Add.htm)
 
 [Manage the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Maint.htm)
 
-[Manual add a token to the APP connector](https://help.afas.nl/help/NL/SE/App_Apps_Custom_Tokens_Manual.htm)
+[Configure OAuth on the APP connector](https://help.afas.nl/help/NL/SE/120718.htm#o136210)
 
 ### Connection settings
 
 The following settings are required to connect to the API.
 
-| Setting         | Description                                   | Mandatory   |
-| --------------- | --------------------------------------------- | ----------- |
-| BaseUrl         | The URL to the AFAS environment REST services | Yes         |
-| ApiKey          | The AppConnector token to connect to AFAS     | Yes         |
-| positionsAction | What to do with positions? Only use employments and skip positions (onlyEmployments) OR use positions and skip persons without (usePositions) | Yes         |
+| Setting                                 | Description                                                                                                                                   | Mandatory |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| BaseUrl                                 | The URL to the AFAS environment REST services                                                                                                 | Yes       |
+| ClientId                                | The OAuth client id of the AppConnector                                                                                                       | Yes       |
+| ClientSecret                            | The OAuth client secret of the AppConnector                                                                                                   | Yes       |
+| positionsAction                         | What to do with positions? Only use employments and skip positions (onlyEmployments) OR use positions and skip persons without (usePositions) | Yes       |
+| excludePersonsWithoutContractsInHelloID | Exclude persons without contracts in HelloID                                                                                                  | No        |
+| isDebug                                 | Toggle debug logging                                                                                                                          | No        |
 
 ### Prerequisites
 
 - [ ] HelloID Provisioning agent (cloud or on-prem).
 - [ ] Loaded and available AFAS GetConnectors.
-- [ ] AFAS App Connector with access to the GetConnectors and associated views.
-  - [ ] Token for this AppConnector
+- [ ] AFAS App Connector with access to the GetConnectors and associated views, configured for OAuth client credentials.
+  - [ ] OAuth client id
+  - [ ] OAuth client secret
   
 
 ### Source
@@ -90,12 +88,26 @@ The following GetConnectors are required by HelloID when the system is defined a
 A basic mapping is provided. Make sure to further customize these accordingly.
 Please choose the default mappingset to use with the configured configuration.
 
+### Primary contract calculation
+For AFAS with `positionsAction = usePositions`, configure the primary contract calculation in HelloID with the following sort order:
+
+| Field                                              | Direction  |
+|----------------------------------------------------|------------|
+| Details.FTE                                        | Descending |
+| Details.HoursPerWeek                               | Descending |
+| Details.Percentage (shown as Percentage in the UI) | Descending |
+| Details.Sequence                                   | Descending |
+| EndDate                                            | Descending |
+| StartDate                                          | Ascending  |
+
+Including `Details.Percentage` is required to match the intended primary contract selection for AFAS positions.
+
 ### Scope
 The data collection retrieved by the set of GetConnector's is sufficient for HelloID to provision persons.
 The data collection can be changed by the customer itself to meet their requirements.
 
 | Connector                                             | Field               | Default filter            |
-| ----------------------------------------------------- | ------------------- | ------------------------- |
+|-------------------------------------------------------|---------------------|---------------------------|
 | __Tools4ever - HelloID - T4E_HelloID_Users_v2__       | contract start date | <[Vandaag + 3 maanden]    |
 |                                                       | contract end date   | >[Vandaag - 3 maanden];[] |
 | __Tools4ever - HelloID - T4E_HelloID_Employments_v2__ | contract start date | <[Vandaag + 3 maanden]    |

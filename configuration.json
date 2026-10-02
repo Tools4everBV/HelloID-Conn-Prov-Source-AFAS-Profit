@@ -10,13 +10,23 @@
     }
   },
   {
-    "key": "Token",
+    "key": "ClientId",
     "type": "input",
     "templateOptions": {
-      "label": "Token",
+      "label": "Client ID",
+      "placeholder": "Example: 2f8a2f4d-9a5f-41d8-aec8-6ab123456789",
+      "description": "The OAuth client id of the AFAS AppConnector.",
+      "required": true
+    }
+  },
+  {
+    "key": "ClientSecret",
+    "type": "input",
+    "templateOptions": {
+      "label": "Client Secret",
       "type": "password",
-      "placeholder": "Example: <token><version>1</version><data>555012345678901234567890123456789</data></token>",
-      "description": "The AppConnector token to connect to Profit.",
+      "placeholder": "Example: 1234567890abcdef1234567890abcdef12345678",
+      "description": "The OAuth client secret of the AFAS AppConnector.",
       "required": true
     }
   },
